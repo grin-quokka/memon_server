@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/codestates/memon-server#readme",
   "devDependencies": {
+    "express": "^4.17.1",
     "tslint": "^5.20.1",
     "typescript": "^3.7.2"
   },
