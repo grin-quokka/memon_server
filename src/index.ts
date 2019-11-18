@@ -1,20 +1,10 @@
 import 'source-map-support/register';
 import * as express from 'express';
-import App from './App';
+import { app } from './app';
+import { sequelizeConfig } from './sequelizeConfig';
 
-const app = new App().application;
+(async () => {
+  await sequelizeConfig.sync({ force: true });
 
-app.get('/', (req: express.Request, res: express.Response) => {
-  res.send('Hello MEMON :x');
-});
-
-app.get('/main', (req: express.Request, res: express.Response) => {
-  const obj = {
-    moneyToPay: 500,
-    moneyToGet: 1000
-  };
-
-  res.send(obj);
-});
-
-app.listen(3000, () => console.log('http://localhost:3000'));
+  app.listen(3000, () => console.log('http://localhost:3000'));
+})();
