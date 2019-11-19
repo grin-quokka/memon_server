@@ -4,7 +4,10 @@ import { app } from './app';
 import { sequelizeConfig } from './sequelizeConfig';
 
 (async () => {
-  await sequelizeConfig.sync({ force: true });
-
-  app.listen(3000, () => console.log('http://localhost:3000'));
+  try {
+    await sequelizeConfig.sync({ force: true });
+    app.listen(3000, () => console.log('http://localhost:3000'));
+  } catch (error) {
+    console.log('Err', error);
+  }
 })();

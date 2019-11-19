@@ -13,7 +13,12 @@ require("source-map-support/register");
 const app_1 = require("./app");
 const sequelizeConfig_1 = require("./sequelizeConfig");
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    yield sequelizeConfig_1.sequelizeConfig.sync({ force: true });
-    app_1.app.listen(3000, () => console.log('http://localhost:3000'));
+    try {
+        yield sequelizeConfig_1.sequelizeConfig.sync({ force: true });
+        app_1.app.listen(3000, () => console.log('http://localhost:3000'));
+    }
+    catch (error) {
+        console.log('Err', error);
+    }
 }))();
 //# sourceMappingURL=index.js.map
