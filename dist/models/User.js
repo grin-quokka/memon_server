@@ -23,7 +23,7 @@ __decorate([
     sequelize_typescript_1.Unique,
     sequelize_typescript_1.Column,
     __metadata("design:type", String)
-], User.prototype, "loginId", void 0);
+], User.prototype, "email", void 0);
 __decorate([
     sequelize_typescript_1.Column,
     __metadata("design:type", String)

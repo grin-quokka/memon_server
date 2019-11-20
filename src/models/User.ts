@@ -22,7 +22,7 @@ export default class User extends Model<User> {
 
   @Unique
   @Column
-  loginId!: string;
+  email!: string;
 
   @Column
   phone!: string;
