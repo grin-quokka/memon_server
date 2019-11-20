@@ -12,4 +12,8 @@ exports.app.get('/main', (req, res) => {
     };
     res.send(obj);
 });
+exports.app.get('/login', (req, res) => {
+    // tokenToUid(idToken);
+    res.send('완료');
+});
 //# sourceMappingURL=app.js.map

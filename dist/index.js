@@ -14,7 +14,7 @@ const app_1 = require("./app");
 const sequelizeConfig_1 = require("./sequelizeConfig");
 (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield sequelizeConfig_1.sequelizeConfig.sync({ force: true });
+        yield sequelizeConfig_1.sequelizeConfig.sync();
         app_1.app.listen(5000, () => console.log('server is listening..'));
     }
     catch (error) {

@@ -1,4 +1,11 @@
 node_modules
+config.ts
+config.js
+config.js.map
+serviceAccountKey.json
+firebaseConfig.ts
+firebaseConfig.js
+firebaseConfig.js.map
 
 # Created by https://www.gitignore.io/api/node,linux
 # Edit at https://www.gitignore.io/?templates=node,linux

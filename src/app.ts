@@ -1,4 +1,5 @@
 import * as express from 'express';
+import tokenToUid from './tokenToUid';
 
 export const app = express();
 
@@ -13,4 +14,9 @@ app.get('/main', (req: express.Request, res: express.Response) => {
   };
 
   res.send(obj);
+});
+
+app.get('/login', (req: express.Request, res: express.Response) => {
+  // tokenToUid(idToken);
+  res.send('완료');
 });
