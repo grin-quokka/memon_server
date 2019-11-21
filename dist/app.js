@@ -10,8 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
-const User_1 = require("./models/User");
 const moment = require("moment-timezone");
+const User_1 = require("./models/User");
 exports.app = express();
 exports.app.use(express.json());
 exports.app.get('/', (req, res) => {
