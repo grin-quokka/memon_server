@@ -25,6 +25,7 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
+    sequelize_typescript_1.Unique,
     sequelize_typescript_1.Column,
     __metadata("design:type", String)
 ], User.prototype, "phone", void 0);
@@ -48,7 +49,9 @@ __decorate([
 ], User.prototype, "transactions", void 0);
 User = __decorate([
     sequelize_typescript_1.Table({
-        timestamps: true
+        timestamps: true,
+        charset: 'utf8',
+        collate: 'utf8_general_ci'
     })
 ], User);
 exports.default = User;

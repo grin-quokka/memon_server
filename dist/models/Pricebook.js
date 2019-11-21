@@ -51,7 +51,9 @@ __decorate([
 ], Pricebook.prototype, "transactions", void 0);
 Pricebook = __decorate([
     sequelize_typescript_1.Table({
-        timestamps: true
+        timestamps: true,
+        charset: 'utf8',
+        collate: 'utf8_general_ci'
     })
 ], Pricebook);
 exports.default = Pricebook;

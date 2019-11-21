@@ -12,7 +12,9 @@ import User from './User';
 import Pricebook from './Pricebook';
 
 @Table({
-  timestamps: true
+  timestamps: true,
+  charset: 'utf8',
+  collate: 'utf8_general_ci'
 })
 export default class Transaction extends Model<Transaction> {
   @PrimaryKey

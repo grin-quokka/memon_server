@@ -11,7 +11,9 @@ import {
 import Transaction from './Transaction';
 
 @Table({
-  timestamps: true
+  timestamps: true,
+  charset: 'utf8',
+  collate: 'utf8_general_ci'
 })
 export default class Pricebook extends Model<Pricebook> {
   @PrimaryKey

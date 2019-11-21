@@ -59,7 +59,9 @@ __decorate([
 ], Transaction.prototype, "updatedOn", void 0);
 Transaction = __decorate([
     sequelize_typescript_1.Table({
-        timestamps: true
+        timestamps: true,
+        charset: 'utf8',
+        collate: 'utf8_general_ci'
     })
 ], Transaction);
 exports.default = Transaction;

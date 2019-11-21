@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const User_1 = require("./models/User");
+const moment = require("moment-timezone");
 exports.app = express();
 exports.app.use(express.json());
 exports.app.get('/', (req, res) => {
@@ -29,8 +30,15 @@ exports.app.get('/login', (req, res) => {
 });
 exports.app.post('/signup', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield User_1.default.create(req.body);
-        res.status(201).json(user);
+        let user = yield User_1.default.create(req.body);
+        const stringi = JSON.stringify(user);
+        const pars = JSON.parse(stringi);
+        let change = Object.assign(Object.assign({}, pars), { creationDate: moment(user.creationDate)
+                .tz('Asia/Seoul')
+                .format(), updatedOn: moment(user.updatedOn)
+                .tz('Asia/Seoul')
+                .format() });
+        res.status(201).json(change);
     }
     catch (err) {
         console.log(err);

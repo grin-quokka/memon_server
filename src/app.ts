@@ -1,6 +1,7 @@
 import * as express from 'express';
 import tokenToUid from './tokenToUid';
 import User from './models/User';
+import * as moment from 'moment-timezone';
 
 export const app = express();
 
@@ -26,8 +27,20 @@ app.get('/login', (req: express.Request, res: express.Response) => {
 
 app.post('/signup', async (req: express.Request, res: express.Response) => {
   try {
-    const user = await User.create(req.body);
-    res.status(201).json(user);
+    let user = await User.create(req.body);
+    const stringi = JSON.stringify(user);
+    const pars = JSON.parse(stringi);
+
+    let change = {
+      ...pars,
+      creationDate: moment(user.creationDate)
+        .tz('Asia/Seoul')
+        .format(),
+      updatedOn: moment(user.updatedOn)
+        .tz('Asia/Seoul')
+        .format()
+    };
+    res.status(201).json(change);
   } catch (err) {
     console.log(err);
     res.sendStatus(400);

@@ -12,7 +12,9 @@ import {
 import Transaction from './Transaction';
 
 @Table({
-  timestamps: true
+  timestamps: true,
+  charset: 'utf8',
+  collate: 'utf8_general_ci'
 })
 export default class User extends Model<User> {
   @PrimaryKey
@@ -24,6 +26,7 @@ export default class User extends Model<User> {
   @Column
   email!: string;
 
+  @Unique
   @Column
   phone!: string;
 
