@@ -17,6 +17,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
 
 app.post('/main', async (req: express.Request, res: express.Response) => {
   try {
+    let moneyToPay = 0;
     const email = req.body.email;
 
     const prkey = await User.findOne({
@@ -27,27 +28,26 @@ app.post('/main', async (req: express.Request, res: express.Response) => {
     });
 
     const payment = await Payment.findAll({
-      raw: true,
       attributes: ['pricebookId'],
       where: {
         participantId: prkey.id,
         isPayed: false
       }
     });
-    console.log(payment);
 
-    let sum = 0;
+    for (let i = 0; i < payment.length; i++) {
+      const pricebook = await Pricebook.findOne({
+        raw: true,
+        where: { id: payment[i].pricebookId, transCompleted: false }
+      });
 
-    payment.forEach(ele => {
-      Pricebook.findOne({ where: { id: ele.pricebookId } });
-    });
-
-    // 토탈프라이스 나누기 count한걸 다 sum한다...
+      moneyToPay += pricebook.totalPrice / pricebook.count;
+    }
 
     // 받을돈은?? 트랜잭션의 보스가 나이면서, ispayed가 false인 경우의 갯수를 센다.
     // 그 갯수가 0이 아니라면, 프라이스북 아이디를 가지고 프라이스북으로 가서 토탈프라이스 나누기 갯수
     const obj = {
-      moneyToPay: 500,
+      moneyToPay,
       moneyToGet: 1000
     };
 
