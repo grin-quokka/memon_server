@@ -12,25 +12,51 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const moment = require("moment-timezone");
 const User_1 = require("./models/User");
+const Pricebook_1 = require("./models/Pricebook");
+const Payment_1 = require("./models/Payment");
 const seed_1 = require("./seed");
+const sequelize = require("sequelize");
 exports.app = express();
 exports.app.use(express.json());
 exports.app.get('/', (req, res) => {
     res.send('Hello MEMON :x');
 });
-exports.app.get('/main', (req, res) => {
-    // TODO: req로 이메일을 받는다
-    // 그 유저를 찾아서 -> 낼돈, 받을돈 각각 계산
-    // 낼돈은?? 트랜잭션의 파티스펀트 아이디에 내가 있고, isPayed가 false인 경우의 pricebookid로 가서
-    // 토탈프라이스 나누기 count
-    // 받을돈은?? 트랜잭션의 보스가 나이면서, ispayed가 false인 경우의 갯수를 센다.
-    // 그 갯수가 0이 아니라면, 프라이스북 아이디를 가지고 프라이스북으로 가서 토탈프라이스 나누기 갯수
-    const obj = {
-        moneyToPay: 500,
-        moneyToGet: 1000
-    };
-    res.send(obj);
-});
+exports.app.post('/main', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const email = req.body.email;
+        const prkey = yield User_1.default.findOne({
+            attributes: ['id'],
+            where: {
+                email
+            }
+        });
+        const payment = yield Payment_1.default.findAll({
+            raw: true,
+            attributes: ['pricebookId'],
+            where: {
+                participantId: prkey.id,
+                isPayed: false
+            }
+        });
+        console.log(payment);
+        let sum = 0;
+        payment.forEach(ele => {
+            Pricebook_1.default.findOne({ where: { id: ele.pricebookId } });
+        });
+        // 토탈프라이스 나누기 count한걸 다 sum한다...
+        // 받을돈은?? 트랜잭션의 보스가 나이면서, ispayed가 false인 경우의 갯수를 센다.
+        // 그 갯수가 0이 아니라면, 프라이스북 아이디를 가지고 프라이스북으로 가서 토탈프라이스 나누기 갯수
+        const obj = {
+            moneyToPay: 500,
+            moneyToGet: 1000
+        };
+        res.send(obj);
+    }
+    catch (err) {
+        console.log(err);
+        res.sendStatus(400);
+    }
+}));
 exports.app.get('/login', (req, res) => {
     // tokenToUid(idToken);
     res.send('완료');
@@ -79,4 +105,27 @@ exports.app.get('/seed', (req, res) => {
         }
     }))();
 });
+// only for test
+exports.app.delete('/users', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = yield User_1.default.findOne({ where: req.body });
+        const pricebookId = yield Payment_1.default.findAll({
+            raw: true,
+            where: {
+                [sequelize.Op.or]: [{ bossId: userId.id }, { participantId: userId.id }]
+            }
+        });
+        pricebookId.forEach(ele => {
+            Pricebook_1.default.destroy({
+                where: { id: ele.pricebookId }
+            });
+        });
+        yield User_1.default.destroy({ where: { id: userId.id } });
+        res.sendStatus(200);
+    }
+    catch (err) {
+        console.log(err);
+        res.sendStatus(400);
+    }
+}));
 //# sourceMappingURL=app.js.map
