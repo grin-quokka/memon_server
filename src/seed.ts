@@ -1,6 +1,6 @@
 import User from './models/User';
 import Pricebook from './models/Pricebook';
-import Transaction from './models/Transaction';
+import Payment from './models/Payment';
 
 const seed = async () => {
   await User.bulkCreate([
@@ -25,7 +25,7 @@ const seed = async () => {
     transCompleted: false,
     count: 3
   });
-  await Transaction.bulkCreate([
+  await Payment.bulkCreate([
     {
       bossId: 1,
       participantId: 2,

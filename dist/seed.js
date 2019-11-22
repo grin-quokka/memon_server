@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const User_1 = require("./models/User");
 const Pricebook_1 = require("./models/Pricebook");
-const Transaction_1 = require("./models/Transaction");
+const Payment_1 = require("./models/Payment");
 const seed = () => __awaiter(void 0, void 0, void 0, function* () {
     yield User_1.default.bulkCreate([
         {
@@ -35,7 +35,7 @@ const seed = () => __awaiter(void 0, void 0, void 0, function* () {
         transCompleted: false,
         count: 3
     });
-    yield Transaction_1.default.bulkCreate([
+    yield Payment_1.default.bulkCreate([
         {
             bossId: 1,
             participantId: 2,

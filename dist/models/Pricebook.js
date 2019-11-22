@@ -10,7 +10,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_typescript_1 = require("sequelize-typescript");
-const Transaction_1 = require("./Transaction");
 let Pricebook = class Pricebook extends sequelize_typescript_1.Model {
 };
 __decorate([
@@ -20,10 +19,12 @@ __decorate([
     __metadata("design:type", Number)
 ], Pricebook.prototype, "id", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
 ], Pricebook.prototype, "totalPrice", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
     __metadata("design:type", Boolean)
 ], Pricebook.prototype, "transCompleted", void 0);
@@ -32,6 +33,7 @@ __decorate([
     __metadata("design:type", String)
 ], Pricebook.prototype, "billImgSrc", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
 ], Pricebook.prototype, "count", void 0);
@@ -45,10 +47,6 @@ __decorate([
     sequelize_typescript_1.Column,
     __metadata("design:type", Date)
 ], Pricebook.prototype, "updatedOn", void 0);
-__decorate([
-    sequelize_typescript_1.HasMany(() => Transaction_1.default),
-    __metadata("design:type", Array)
-], Pricebook.prototype, "transactions", void 0);
 Pricebook = __decorate([
     sequelize_typescript_1.Table({
         timestamps: true,
