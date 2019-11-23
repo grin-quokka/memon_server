@@ -37,6 +37,14 @@ export default class Pricebook extends Model<Pricebook> {
   @Column
   count!: number;
 
+  @AllowNull(false)
+  @Column
+  partyDate!: Date;
+
+  @AllowNull(false)
+  @Column
+  title!: string;
+
   @CreatedAt
   @Column
   creationDate!: Date;
