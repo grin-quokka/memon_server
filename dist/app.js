@@ -153,4 +153,21 @@ exports.app.delete('/users', (req, res) => __awaiter(void 0, void 0, void 0, fun
         res.sendStatus(400);
     }
 }));
+exports.app.post('/users/contacts', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = [];
+        for (let i = 0; i < req.body.length; i++) {
+            const user = yield User_1.default.findOne({
+                raw: true,
+                where: { phone: req.body[i].phone }
+            });
+            result.push({ name: req.body[i].name, phone: user.phone, id: user.id });
+        }
+        res.send(result);
+    }
+    catch (err) {
+        console.log(err);
+        res.sendStatus(400);
+    }
+}));
 //# sourceMappingURL=app.js.map

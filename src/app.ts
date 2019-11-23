@@ -165,3 +165,26 @@ app.delete('/users', async (req: express.Request, res: express.Response) => {
     res.sendStatus(400);
   }
 });
+
+app.post(
+  '/users/contacts',
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const result: Object[] = [];
+
+      for (let i = 0; i < req.body.length; i++) {
+        const user = await User.findOne({
+          raw: true,
+          where: { phone: req.body[i].phone }
+        });
+
+        result.push({ name: req.body[i].name, phone: user.phone, id: user.id });
+      }
+
+      res.send(result);
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(400);
+    }
+  }
+);
