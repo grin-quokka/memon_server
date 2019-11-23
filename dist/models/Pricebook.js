@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_typescript_1 = require("sequelize-typescript");
+const Payment_1 = require("./Payment");
 let Pricebook = class Pricebook extends sequelize_typescript_1.Model {
 };
 __decorate([
@@ -47,6 +48,10 @@ __decorate([
     sequelize_typescript_1.Column,
     __metadata("design:type", Date)
 ], Pricebook.prototype, "updatedOn", void 0);
+__decorate([
+    sequelize_typescript_1.HasMany(() => Payment_1.default, { onDelete: 'cascade' }),
+    __metadata("design:type", Array)
+], Pricebook.prototype, "transactions", void 0);
 Pricebook = __decorate([
     sequelize_typescript_1.Table({
         timestamps: true,

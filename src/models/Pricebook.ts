@@ -45,6 +45,6 @@ export default class Pricebook extends Model<Pricebook> {
   @Column
   updatedOn!: Date;
 
-  // @HasMany(() => Transaction, { onDelete: 'cascade' })
-  // transactions: Transaction[];
+  @HasMany(() => Payment, { onDelete: 'cascade' })
+  transactions: Payment[];
 }
