@@ -17,7 +17,11 @@ app.get('/', (req: express.Request, res: express.Response) => {
 
 app.post('/main', async (req: express.Request, res: express.Response) => {
   try {
-    let moneyToPay = 0;
+    const sum = {
+      moneyToPay: 0,
+      moneyToGet: 0
+    };
+
     const email = req.body.email;
 
     const prkey = await User.findOne({
@@ -35,23 +39,46 @@ app.post('/main', async (req: express.Request, res: express.Response) => {
       }
     });
 
-    for (let i = 0; i < payment.length; i++) {
-      const pricebook = await Pricebook.findOne({
-        raw: true,
-        where: { id: payment[i].pricebookId, transCompleted: false }
-      });
+    if (payment.length > 0) {
+      for (let i = 0; i < payment.length; i++) {
+        const pricebook = await Pricebook.findOne({
+          raw: true,
+          where: { id: payment[i].pricebookId, transCompleted: false }
+        });
 
-      moneyToPay += pricebook.totalPrice / pricebook.count;
+        sum.moneyToPay += pricebook.totalPrice / pricebook.count;
+      }
     }
 
-    // 받을돈은?? 트랜잭션의 보스가 나이면서, ispayed가 false인 경우의 갯수를 센다.
-    // 그 갯수가 0이 아니라면, 프라이스북 아이디를 가지고 프라이스북으로 가서 토탈프라이스 나누기 갯수
-    const obj = {
-      moneyToPay,
-      moneyToGet: 1000
-    };
+    const bossPayment = await Payment.findAll({
+      raw: true,
+      where: { bossId: prkey.id, isPayed: false }
+    });
 
-    res.send(obj);
+    if (bossPayment.length > 0) {
+      const pricebookCnt = {};
+
+      for (let i = 0; i < bossPayment.length; i++) {
+        if (pricebookCnt.hasOwnProperty(bossPayment[i].pricebookId)) {
+          pricebookCnt[bossPayment[i].pricebookId]++;
+        } else {
+          pricebookCnt[bossPayment[i].pricebookId] = 1;
+        }
+      }
+
+      const pricebookCntKeys = Object.keys(pricebookCnt);
+
+      for (let i = 0; i < pricebookCntKeys.length; i++) {
+        const getPrice = await Pricebook.findOne({
+          raw: true,
+          where: { id: Number(pricebookCntKeys[i]) }
+        });
+        sum.moneyToGet +=
+          (getPrice.totalPrice / getPrice.count) *
+          pricebookCnt[pricebookCntKeys[i]];
+      }
+    }
+    res.send(sum);
   } catch (err) {
     console.log(err);
     res.sendStatus(400);

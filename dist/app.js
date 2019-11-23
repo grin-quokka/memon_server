@@ -23,7 +23,10 @@ exports.app.get('/', (req, res) => {
 });
 exports.app.post('/main', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let moneyToPay = 0;
+        const sum = {
+            moneyToPay: 0,
+            moneyToGet: 0
+        };
         const email = req.body.email;
         const prkey = yield User_1.default.findOne({
             attributes: ['id'],
@@ -38,20 +41,41 @@ exports.app.post('/main', (req, res) => __awaiter(void 0, void 0, void 0, functi
                 isPayed: false
             }
         });
-        for (let i = 0; i < payment.length; i++) {
-            const pricebook = yield Pricebook_1.default.findOne({
-                raw: true,
-                where: { id: payment[i].pricebookId, transCompleted: false }
-            });
-            moneyToPay += pricebook.totalPrice / pricebook.count;
+        if (payment.length > 0) {
+            for (let i = 0; i < payment.length; i++) {
+                const pricebook = yield Pricebook_1.default.findOne({
+                    raw: true,
+                    where: { id: payment[i].pricebookId, transCompleted: false }
+                });
+                sum.moneyToPay += pricebook.totalPrice / pricebook.count;
+            }
         }
-        // 받을돈은?? 트랜잭션의 보스가 나이면서, ispayed가 false인 경우의 갯수를 센다.
-        // 그 갯수가 0이 아니라면, 프라이스북 아이디를 가지고 프라이스북으로 가서 토탈프라이스 나누기 갯수
-        const obj = {
-            moneyToPay,
-            moneyToGet: 1000
-        };
-        res.send(obj);
+        const bossPayment = yield Payment_1.default.findAll({
+            raw: true,
+            where: { bossId: prkey.id, isPayed: false }
+        });
+        if (bossPayment.length > 0) {
+            const pricebookCnt = {};
+            for (let i = 0; i < bossPayment.length; i++) {
+                if (pricebookCnt.hasOwnProperty(bossPayment[i].pricebookId)) {
+                    pricebookCnt[bossPayment[i].pricebookId]++;
+                }
+                else {
+                    pricebookCnt[bossPayment[i].pricebookId] = 1;
+                }
+            }
+            const pricebookCntKeys = Object.keys(pricebookCnt);
+            for (let i = 0; i < pricebookCntKeys.length; i++) {
+                const getPrice = yield Pricebook_1.default.findOne({
+                    raw: true,
+                    where: { id: Number(pricebookCntKeys[i]) }
+                });
+                sum.moneyToGet +=
+                    (getPrice.totalPrice / getPrice.count) *
+                        pricebookCnt[pricebookCntKeys[i]];
+            }
+        }
+        res.send(sum);
     }
     catch (err) {
         console.log(err);
