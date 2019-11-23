@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const User_1 = require("./models/User");
 const Pricebook_1 = require("./models/Pricebook");
 const Payment_1 = require("./models/Payment");
+const moment_1 = require("moment");
 const seed = () => __awaiter(void 0, void 0, void 0, function* () {
     yield User_1.default.bulkCreate([
         {
@@ -33,7 +34,9 @@ const seed = () => __awaiter(void 0, void 0, void 0, function* () {
     yield Pricebook_1.default.create({
         totalPrice: 30000,
         transCompleted: false,
-        count: 3
+        count: 3,
+        partyDate: moment_1.now(),
+        title: '마라샹궈'
     });
     yield Payment_1.default.bulkCreate([
         {

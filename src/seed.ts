@@ -1,6 +1,7 @@
 import User from './models/User';
 import Pricebook from './models/Pricebook';
 import Payment from './models/Payment';
+import { now } from 'moment';
 
 const seed = async () => {
   await User.bulkCreate([
@@ -23,7 +24,9 @@ const seed = async () => {
   await Pricebook.create({
     totalPrice: 30000,
     transCompleted: false,
-    count: 3
+    count: 3,
+    partyDate: now(),
+    title: '마라샹궈'
   });
   await Payment.bulkCreate([
     {
