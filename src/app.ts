@@ -250,3 +250,33 @@ app.post(
     }
   }
 );
+
+app.post('/pricebook', async (req: express.Request, res: express.Response) => {
+  try {
+    const user = await User.findOne({
+      raw: true,
+      where: { email: req.body.email }
+    });
+
+    const pricebook = await Pricebook.findOne({
+      raw: true,
+      where: { id: req.body.pricebookId }
+    });
+    const result: Object[] = [{ pricebook: pricebook }];
+
+    const payment = await Payment.findAll({
+      raw: true,
+      where: {
+        pricebookId: req.body.pricebookId,
+        [sequelize.Op.or]: [{ bossId: user.id }, { participantId: user.id }]
+      }
+    });
+
+    result.push({ payment: payment });
+
+    res.send(result);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
+  }
+});
