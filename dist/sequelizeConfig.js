@@ -9,6 +9,13 @@ exports.sequelizeConfig = new sequelize_typescript_1.Sequelize({
     dialect: 'postgres',
     username: process.env.DB_USER,
     password: process.env.DB_PASS,
-    models: [__dirname + '/models']
+    models: [__dirname + '/models'],
+    timezone: '+09:00',
+    dialectOptions: {
+        useUTC: false,
+        charset: 'utf8',
+        dateStrings: true,
+        typeCast: true
+    }
 });
 //# sourceMappingURL=sequelizeConfig.js.map

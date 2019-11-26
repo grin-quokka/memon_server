@@ -7,12 +7,15 @@ import {
   Unique,
   PrimaryKey,
   AutoIncrement,
-  HasMany
+  HasMany,
+  AllowNull
 } from 'sequelize-typescript';
-import Transaction from './Transaction';
+import Payment from './Payment';
 
 @Table({
-  timestamps: true
+  timestamps: true,
+  charset: 'utf8',
+  collate: 'utf8_general_ci'
 })
 export default class User extends Model<User> {
   @PrimaryKey
@@ -20,13 +23,17 @@ export default class User extends Model<User> {
   @Column
   id!: number;
 
+  @AllowNull(false)
   @Unique
   @Column
-  loginId!: string;
+  email!: string;
 
+  @AllowNull(false)
+  @Unique
   @Column
   phone!: string;
 
+  @AllowNull(false)
   @Column
   avatar!: string;
 
@@ -38,6 +45,6 @@ export default class User extends Model<User> {
   @Column
   updatedOn!: Date;
 
-  @HasMany(() => Transaction)
-  transactions: Transaction[];
+  @HasMany(() => Payment, { onDelete: 'cascade' })
+  payment: Payment[];
 }

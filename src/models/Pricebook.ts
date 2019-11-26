@@ -6,12 +6,15 @@ import {
   UpdatedAt,
   PrimaryKey,
   AutoIncrement,
-  HasMany
+  HasMany,
+  AllowNull
 } from 'sequelize-typescript';
-import Transaction from './Transaction';
+import Payment from './Payment';
 
 @Table({
-  timestamps: true
+  timestamps: true,
+  charset: 'utf8',
+  collate: 'utf8_general_ci'
 })
 export default class Pricebook extends Model<Pricebook> {
   @PrimaryKey
@@ -19,17 +22,28 @@ export default class Pricebook extends Model<Pricebook> {
   @Column
   id!: number;
 
+  @AllowNull(false)
   @Column
   totalPrice!: number;
 
+  @AllowNull(false)
   @Column
   transCompleted!: boolean;
 
   @Column
   billImgSrc?: string;
 
+  @AllowNull(false)
   @Column
   count!: number;
+
+  @AllowNull(false)
+  @Column
+  partyDate!: Date;
+
+  @AllowNull(false)
+  @Column
+  title!: string;
 
   @CreatedAt
   @Column
@@ -39,6 +53,6 @@ export default class Pricebook extends Model<Pricebook> {
   @Column
   updatedOn!: Date;
 
-  @HasMany(() => Transaction)
-  transactions: Transaction[];
+  @HasMany(() => Payment, { onDelete: 'cascade' })
+  transactions: Payment[];
 }

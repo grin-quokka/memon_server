@@ -12,55 +12,67 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_typescript_1 = require("sequelize-typescript");
 const User_1 = require("./User");
 const Pricebook_1 = require("./Pricebook");
-let Transaction = class Transaction extends sequelize_typescript_1.Model {
+let Payment = class Payment extends sequelize_typescript_1.Model {
 };
 __decorate([
     sequelize_typescript_1.PrimaryKey,
     sequelize_typescript_1.AutoIncrement,
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
-], Transaction.prototype, "id", void 0);
+], Payment.prototype, "id", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.ForeignKey(() => User_1.default),
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
-], Transaction.prototype, "bossId", void 0);
+], Payment.prototype, "bossId", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.ForeignKey(() => User_1.default),
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
-], Transaction.prototype, "participantId", void 0);
+], Payment.prototype, "participantId", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.ForeignKey(() => Pricebook_1.default),
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
-], Transaction.prototype, "pricebookId", void 0);
+], Payment.prototype, "pricebookId", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
     __metadata("design:type", Boolean)
-], Transaction.prototype, "isIn", void 0);
+], Payment.prototype, "isIn", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
     __metadata("design:type", Boolean)
-], Transaction.prototype, "isPayed", void 0);
+], Payment.prototype, "isPayed", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
-], Transaction.prototype, "demandCnt", void 0);
+], Payment.prototype, "demandCnt", void 0);
 __decorate([
     sequelize_typescript_1.CreatedAt,
     sequelize_typescript_1.Column,
     __metadata("design:type", Date)
-], Transaction.prototype, "creationDate", void 0);
+], Payment.prototype, "creationDate", void 0);
 __decorate([
     sequelize_typescript_1.UpdatedAt,
     sequelize_typescript_1.Column,
     __metadata("design:type", Date)
-], Transaction.prototype, "updatedOn", void 0);
-Transaction = __decorate([
+], Payment.prototype, "updatedOn", void 0);
+__decorate([
+    sequelize_typescript_1.BelongsTo(() => Pricebook_1.default, { onDelete: 'cascade' }),
+    __metadata("design:type", Pricebook_1.default)
+], Payment.prototype, "pricebook", void 0);
+Payment = __decorate([
     sequelize_typescript_1.Table({
-        timestamps: true
+        timestamps: true,
+        charset: 'utf8',
+        collate: 'utf8_general_ci'
     })
-], Transaction);
-exports.default = Transaction;
-//# sourceMappingURL=Transaction.js.map
+], Payment);
+exports.default = Payment;
+//# sourceMappingURL=Payment.js.map

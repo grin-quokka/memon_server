@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_typescript_1 = require("sequelize-typescript");
-const Transaction_1 = require("./Transaction");
+const Payment_1 = require("./Payment");
 let User = class User extends sequelize_typescript_1.Model {
 };
 __decorate([
@@ -20,15 +20,19 @@ __decorate([
     __metadata("design:type", Number)
 ], User.prototype, "id", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Unique,
     sequelize_typescript_1.Column,
     __metadata("design:type", String)
-], User.prototype, "loginId", void 0);
+], User.prototype, "email", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Unique,
     sequelize_typescript_1.Column,
     __metadata("design:type", String)
 ], User.prototype, "phone", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
     __metadata("design:type", String)
 ], User.prototype, "avatar", void 0);
@@ -43,12 +47,14 @@ __decorate([
     __metadata("design:type", Date)
 ], User.prototype, "updatedOn", void 0);
 __decorate([
-    sequelize_typescript_1.HasMany(() => Transaction_1.default),
+    sequelize_typescript_1.HasMany(() => Payment_1.default, { onDelete: 'cascade' }),
     __metadata("design:type", Array)
-], User.prototype, "transactions", void 0);
+], User.prototype, "payment", void 0);
 User = __decorate([
     sequelize_typescript_1.Table({
-        timestamps: true
+        timestamps: true,
+        charset: 'utf8',
+        collate: 'utf8_general_ci'
     })
 ], User);
 exports.default = User;
