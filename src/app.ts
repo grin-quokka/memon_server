@@ -215,3 +215,38 @@ app.post('/payment', async (req: express.Request, res: express.Response) => {
     res.sendStatus(400);
   }
 });
+
+app.post(
+  '/payment/all',
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const result: Object[] = [];
+      const user = await User.findOne({
+        raw: true,
+        where: { email: req.body.email }
+      });
+
+      const payment = await Payment.findAll({
+        raw: true,
+        where: {
+          [sequelize.Op.or]: [{ bossId: user.id }, { participantId: user.id }]
+        }
+      });
+
+      if (payment.length > 0) {
+        for (let i = 0; i < payment.length; i++) {
+          const pricebook = await Pricebook.findOne({
+            raw: true,
+            where: { id: payment[i].pricebookId }
+          });
+          result.push({ payment: payment[i], pricebook: pricebook });
+        }
+      }
+
+      res.send(result.reverse());
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(400);
+    }
+  }
+);

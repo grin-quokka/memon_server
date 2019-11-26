@@ -194,4 +194,33 @@ exports.app.post('/payment', (req, res) => __awaiter(void 0, void 0, void 0, fun
         res.sendStatus(400);
     }
 }));
+exports.app.post('/payment/all', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = [];
+        const user = yield User_1.default.findOne({
+            raw: true,
+            where: { email: req.body.email }
+        });
+        const payment = yield Payment_1.default.findAll({
+            raw: true,
+            where: {
+                [sequelize.Op.or]: [{ bossId: user.id }, { participantId: user.id }]
+            }
+        });
+        if (payment.length > 0) {
+            for (let i = 0; i < payment.length; i++) {
+                const pricebook = yield Pricebook_1.default.findOne({
+                    raw: true,
+                    where: { id: payment[i].pricebookId }
+                });
+                result.push({ payment: payment[i], pricebook: pricebook });
+            }
+        }
+        res.send(result.reverse());
+    }
+    catch (err) {
+        console.log(err);
+        res.sendStatus(400);
+    }
+}));
 //# sourceMappingURL=app.js.map
