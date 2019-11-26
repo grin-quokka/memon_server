@@ -262,7 +262,7 @@ app.post('/pricebook', async (req: express.Request, res: express.Response) => {
       raw: true,
       where: { id: req.body.pricebookId }
     });
-    const result: Object[] = [{ pricebook: pricebook }];
+    const result = { pricebook: pricebook, payment: {} };
 
     const payment = await Payment.findAll({
       raw: true,
@@ -272,7 +272,7 @@ app.post('/pricebook', async (req: express.Request, res: express.Response) => {
       }
     });
 
-    result.push({ payment: payment });
+    result.payment = payment;
 
     res.send(result);
   } catch (err) {

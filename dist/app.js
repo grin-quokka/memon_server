@@ -233,7 +233,7 @@ exports.app.post('/pricebook', (req, res) => __awaiter(void 0, void 0, void 0, f
             raw: true,
             where: { id: req.body.pricebookId }
         });
-        const result = [{ pricebook: pricebook }];
+        const result = { pricebook: pricebook, payment: {} };
         const payment = yield Payment_1.default.findAll({
             raw: true,
             where: {
@@ -241,7 +241,7 @@ exports.app.post('/pricebook', (req, res) => __awaiter(void 0, void 0, void 0, f
                 [sequelize.Op.or]: [{ bossId: user.id }, { participantId: user.id }]
             }
         });
-        result.push({ payment: payment });
+        result.payment = payment;
         res.send(result);
     }
     catch (err) {
