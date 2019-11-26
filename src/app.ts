@@ -188,3 +188,30 @@ app.post(
     }
   }
 );
+
+app.post('/payment', async (req: express.Request, res: express.Response) => {
+  try {
+    const pricebook = await Pricebook.create(req.body.priceBook);
+
+    const user = await User.findOne({
+      raw: true,
+      where: { email: req.body.email }
+    });
+
+    await req.body.participant.forEach(ele => {
+      Payment.create({
+        bossId: user.id,
+        participantId: ele.id,
+        pricebookId: pricebook.id,
+        isIn: ele.isIn,
+        isPayed: false,
+        demandCnt: 0
+      });
+    });
+
+    res.send({ pricebookId: pricebook.id });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
+  }
+});

@@ -7,7 +7,8 @@ import {
   PrimaryKey,
   AutoIncrement,
   HasMany,
-  AllowNull
+  AllowNull,
+  DataType
 } from 'sequelize-typescript';
 import Payment from './Payment';
 
@@ -38,7 +39,7 @@ export default class Pricebook extends Model<Pricebook> {
   count!: number;
 
   @AllowNull(false)
-  @Column
+  @Column({ type: DataType.DATEONLY })
   partyDate!: Date;
 
   @AllowNull(false)

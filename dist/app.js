@@ -170,4 +170,28 @@ exports.app.post('/users/contacts', (req, res) => __awaiter(void 0, void 0, void
         res.sendStatus(400);
     }
 }));
+exports.app.post('/payment', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const pricebook = yield Pricebook_1.default.create(req.body.priceBook);
+        const user = yield User_1.default.findOne({
+            raw: true,
+            where: { email: req.body.email }
+        });
+        yield req.body.participant.forEach(ele => {
+            Payment_1.default.create({
+                bossId: user.id,
+                participantId: ele.id,
+                pricebookId: pricebook.id,
+                isIn: ele.isIn,
+                isPayed: false,
+                demandCnt: 0
+            });
+        });
+        res.send({ pricebookId: pricebook.id });
+    }
+    catch (err) {
+        console.log(err);
+        res.sendStatus(400);
+    }
+}));
 //# sourceMappingURL=app.js.map

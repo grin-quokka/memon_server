@@ -40,7 +40,7 @@ __decorate([
 ], Pricebook.prototype, "count", void 0);
 __decorate([
     sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Column,
+    sequelize_typescript_1.Column({ type: sequelize_typescript_1.DataType.DATEONLY }),
     __metadata("design:type", Date)
 ], Pricebook.prototype, "partyDate", void 0);
 __decorate([
