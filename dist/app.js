@@ -277,15 +277,30 @@ exports.app.post('/pricebook', (req, res) => __awaiter(void 0, void 0, void 0, f
             raw: true,
             where: { id: req.body.pricebookId }
         });
-        const result = { pricebook: pricebook, payment: {} };
         const payment = yield Payment_1.default.findAll({
             raw: true,
+            attributes: [
+                'id',
+                'bossId',
+                'participantId',
+                'isIn',
+                'isPayed',
+                'demandCnt'
+            ],
             where: {
                 pricebookId: req.body.pricebookId,
                 [sequelize.Op.or]: [{ bossId: user.id }, { participantId: user.id }]
             }
         });
-        result.payment = payment;
+        const result = {
+            boss: req.body.boss,
+            pricebook: Object.assign(Object.assign({}, pricebook), { creationDate: moment(pricebook.creationDate)
+                    .tz('Asia/Seoul')
+                    .format(), updatedOn: moment(pricebook.updatedOn)
+                    .tz('Asia/Seoul')
+                    .format() }),
+            payment
+        };
         res.send(result);
     }
     catch (err) {
