@@ -170,4 +170,142 @@ exports.app.post('/users/contacts', (req, res) => __awaiter(void 0, void 0, void
         res.sendStatus(400);
     }
 }));
+exports.app.post('/payment', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const pricebook = yield Pricebook_1.default.create(req.body.priceBook);
+        const user = yield User_1.default.findOne({
+            raw: true,
+            where: { email: req.body.email }
+        });
+        yield req.body.participant.forEach(ele => {
+            Payment_1.default.create({
+                bossId: user.id,
+                participantId: ele.id,
+                pricebookId: pricebook.id,
+                isIn: ele.isIn,
+                isPayed: false,
+                demandCnt: 0
+            });
+        });
+        res.send({ pricebookId: pricebook.id });
+    }
+    catch (err) {
+        console.log(err);
+        res.sendStatus(400);
+    }
+}));
+exports.app.post('/payment/all', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = [];
+        const user = yield User_1.default.findOne({
+            raw: true,
+            where: { email: req.body.email }
+        });
+        const bossPayment = yield Payment_1.default.findAll({
+            raw: true,
+            where: {
+                bossId: user.id
+            }
+        });
+        const pricebookCnt = {};
+        for (let i = 0; i < bossPayment.length; i++) {
+            if (pricebookCnt.hasOwnProperty(bossPayment[i].pricebookId)) {
+                if (!bossPayment[i].isPayed) {
+                    pricebookCnt[bossPayment[i].pricebookId]++;
+                }
+            }
+            else {
+                bossPayment[i].isPayed
+                    ? (pricebookCnt[bossPayment[i].pricebookId] = 0)
+                    : (pricebookCnt[bossPayment[i].pricebookId] = 1);
+            }
+        }
+        const pricebookCntKeys = Object.keys(pricebookCnt);
+        for (let i = 0; i < pricebookCntKeys.length; i++) {
+            const getPrice = yield Pricebook_1.default.findOne({
+                raw: true,
+                where: { id: Number(pricebookCntKeys[i]) }
+            });
+            result.push({
+                boss: true,
+                pricebookId: getPrice.id,
+                partyDate: getPrice.partyDate,
+                title: getPrice.title,
+                price: (getPrice.totalPrice / getPrice.count) *
+                    pricebookCnt[pricebookCntKeys[i]],
+                transCompleted: getPrice.transCompleted
+            });
+        }
+        const participantPayment = yield Payment_1.default.findAll({
+            raw: true,
+            where: {
+                participantId: user.id
+            }
+        });
+        for (let i = 0; i < participantPayment.length; i++) {
+            const getPrice = yield Pricebook_1.default.findOne({
+                raw: true,
+                where: { id: participantPayment[i].pricebookId }
+            });
+            result.push({
+                boss: false,
+                pricebookId: getPrice.id,
+                partyDate: getPrice.partyDate,
+                title: getPrice.title,
+                price: getPrice.totalPrice / getPrice.count,
+                isPayed: participantPayment[i].isPayed,
+                transCompleted: getPrice.transCompleted
+            });
+        }
+        result.sort((a, b) => {
+            return (new Date(b.partyDate).getTime() - new Date(a.partyDate).getTime());
+        });
+        res.send(result);
+    }
+    catch (err) {
+        console.log(err);
+        res.sendStatus(400);
+    }
+}));
+exports.app.post('/pricebook', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield User_1.default.findOne({
+            raw: true,
+            where: { email: req.body.email }
+        });
+        const pricebook = yield Pricebook_1.default.findOne({
+            raw: true,
+            where: { id: req.body.pricebookId }
+        });
+        const payment = yield Payment_1.default.findAll({
+            raw: true,
+            attributes: [
+                'id',
+                'bossId',
+                'participantId',
+                'isIn',
+                'isPayed',
+                'demandCnt'
+            ],
+            where: {
+                pricebookId: req.body.pricebookId,
+                [sequelize.Op.or]: [{ bossId: user.id }, { participantId: user.id }]
+            }
+        });
+        const result = {
+            boss: req.body.boss,
+            pricebook: Object.assign(Object.assign({}, pricebook), { creationDate: moment(pricebook.creationDate)
+                    .tz('Asia/Seoul')
+                    .format(), updatedOn: moment(pricebook.updatedOn)
+                    .tz('Asia/Seoul')
+                    .format() }),
+            payment
+        };
+        res.send(result);
+    }
+    catch (err) {
+        console.log(err);
+        res.sendStatus(400);
+    }
+}));
 //# sourceMappingURL=app.js.map

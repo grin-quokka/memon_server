@@ -188,3 +188,175 @@ app.post(
     }
   }
 );
+
+app.post('/payment', async (req: express.Request, res: express.Response) => {
+  try {
+    const pricebook = await Pricebook.create(req.body.priceBook);
+
+    const user = await User.findOne({
+      raw: true,
+      where: { email: req.body.email }
+    });
+
+    await req.body.participant.forEach(ele => {
+      Payment.create({
+        bossId: user.id,
+        participantId: ele.id,
+        pricebookId: pricebook.id,
+        isIn: ele.isIn,
+        isPayed: false,
+        demandCnt: 0
+      });
+    });
+
+    res.send({ pricebookId: pricebook.id });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
+  }
+});
+
+app.post(
+  '/payment/all',
+  async (req: express.Request, res: express.Response) => {
+    try {
+      interface AllPayment {
+        boss: boolean;
+        pricebookId: number;
+        partyDate: Date;
+        title: string;
+        price: number;
+        isPayed?: boolean;
+        transCompleted: boolean;
+      }
+
+      const result: AllPayment[] = [];
+      const user = await User.findOne({
+        raw: true,
+        where: { email: req.body.email }
+      });
+
+      const bossPayment = await Payment.findAll({
+        raw: true,
+        where: {
+          bossId: user.id
+        }
+      });
+
+      const pricebookCnt = {};
+
+      for (let i = 0; i < bossPayment.length; i++) {
+        if (pricebookCnt.hasOwnProperty(bossPayment[i].pricebookId)) {
+          if (!bossPayment[i].isPayed) {
+            pricebookCnt[bossPayment[i].pricebookId]++;
+          }
+        } else {
+          bossPayment[i].isPayed
+            ? (pricebookCnt[bossPayment[i].pricebookId] = 0)
+            : (pricebookCnt[bossPayment[i].pricebookId] = 1);
+        }
+      }
+
+      const pricebookCntKeys = Object.keys(pricebookCnt);
+
+      for (let i = 0; i < pricebookCntKeys.length; i++) {
+        const getPrice = await Pricebook.findOne({
+          raw: true,
+          where: { id: Number(pricebookCntKeys[i]) }
+        });
+        result.push({
+          boss: true,
+          pricebookId: getPrice.id,
+          partyDate: getPrice.partyDate,
+          title: getPrice.title,
+          price:
+            (getPrice.totalPrice / getPrice.count) *
+            pricebookCnt[pricebookCntKeys[i]],
+          transCompleted: getPrice.transCompleted
+        });
+      }
+
+      const participantPayment = await Payment.findAll({
+        raw: true,
+        where: {
+          participantId: user.id
+        }
+      });
+      for (let i = 0; i < participantPayment.length; i++) {
+        const getPrice = await Pricebook.findOne({
+          raw: true,
+          where: { id: participantPayment[i].pricebookId }
+        });
+
+        result.push({
+          boss: false,
+          pricebookId: getPrice.id,
+          partyDate: getPrice.partyDate,
+          title: getPrice.title,
+          price: getPrice.totalPrice / getPrice.count,
+          isPayed: participantPayment[i].isPayed,
+          transCompleted: getPrice.transCompleted
+        });
+      }
+
+      result.sort((a: AllPayment, b: AllPayment) => {
+        return (
+          new Date(b.partyDate).getTime() - new Date(a.partyDate).getTime()
+        );
+      });
+      res.send(result);
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(400);
+    }
+  }
+);
+
+app.post('/pricebook', async (req: express.Request, res: express.Response) => {
+  try {
+    const user = await User.findOne({
+      raw: true,
+      where: { email: req.body.email }
+    });
+
+    const pricebook = await Pricebook.findOne({
+      raw: true,
+      where: { id: req.body.pricebookId }
+    });
+
+    const payment = await Payment.findAll({
+      raw: true,
+      attributes: [
+        'id',
+        'bossId',
+        'participantId',
+        'isIn',
+        'isPayed',
+        'demandCnt'
+      ],
+      where: {
+        pricebookId: req.body.pricebookId,
+        [sequelize.Op.or]: [{ bossId: user.id }, { participantId: user.id }]
+      }
+    });
+
+    const result = {
+      boss: req.body.boss,
+      pricebook: {
+        ...pricebook,
+        creationDate: moment(pricebook.creationDate)
+          .tz('Asia/Seoul')
+          .format(),
+        updatedOn: moment(pricebook.updatedOn)
+          .tz('Asia/Seoul')
+          .format()
+      },
+      payment
+    };
+
+    res.send(result);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
+  }
+});
