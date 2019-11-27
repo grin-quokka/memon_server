@@ -201,22 +201,66 @@ exports.app.post('/payment/all', (req, res) => __awaiter(void 0, void 0, void 0,
             raw: true,
             where: { email: req.body.email }
         });
-        const payment = yield Payment_1.default.findAll({
+        const bossPayment = yield Payment_1.default.findAll({
             raw: true,
             where: {
-                [sequelize.Op.or]: [{ bossId: user.id }, { participantId: user.id }]
+                bossId: user.id
             }
         });
-        if (payment.length > 0) {
-            for (let i = 0; i < payment.length; i++) {
-                const pricebook = yield Pricebook_1.default.findOne({
-                    raw: true,
-                    where: { id: payment[i].pricebookId }
-                });
-                result.push({ payment: payment[i], pricebook: pricebook });
+        const pricebookCnt = {};
+        for (let i = 0; i < bossPayment.length; i++) {
+            if (pricebookCnt.hasOwnProperty(bossPayment[i].pricebookId)) {
+                if (!bossPayment[i].isPayed) {
+                    pricebookCnt[bossPayment[i].pricebookId]++;
+                }
+            }
+            else {
+                bossPayment[i].isPayed
+                    ? (pricebookCnt[bossPayment[i].pricebookId] = 0)
+                    : (pricebookCnt[bossPayment[i].pricebookId] = 1);
             }
         }
-        res.send(result.reverse());
+        const pricebookCntKeys = Object.keys(pricebookCnt);
+        for (let i = 0; i < pricebookCntKeys.length; i++) {
+            const getPrice = yield Pricebook_1.default.findOne({
+                raw: true,
+                where: { id: Number(pricebookCntKeys[i]) }
+            });
+            result.push({
+                boss: true,
+                pricebookId: getPrice.id,
+                partyDate: getPrice.partyDate,
+                title: getPrice.title,
+                price: (getPrice.totalPrice / getPrice.count) *
+                    pricebookCnt[pricebookCntKeys[i]],
+                transCompleted: getPrice.transCompleted
+            });
+        }
+        const participantPayment = yield Payment_1.default.findAll({
+            raw: true,
+            where: {
+                participantId: user.id
+            }
+        });
+        for (let i = 0; i < participantPayment.length; i++) {
+            const getPrice = yield Pricebook_1.default.findOne({
+                raw: true,
+                where: { id: participantPayment[i].pricebookId }
+            });
+            result.push({
+                boss: false,
+                pricebookId: getPrice.id,
+                partyDate: getPrice.partyDate,
+                title: getPrice.title,
+                price: getPrice.totalPrice / getPrice.count,
+                isPayed: participantPayment[i].isPayed,
+                transCompleted: getPrice.transCompleted
+            });
+        }
+        result.sort((a, b) => {
+            return (new Date(b.partyDate).getTime() - new Date(a.partyDate).getTime());
+        });
+        res.send(result);
     }
     catch (err) {
         console.log(err);
