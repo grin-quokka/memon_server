@@ -93,14 +93,12 @@ router.get('/login', (req: express.Request, res: express.Response) => {
 router.post('/pricebook', pricebookController.getSinglePricebook);
 
 router.post('/payment/all', paymentController.getAllPayment);
-
 router.post('/payment', paymentController.createPayment);
 
 router.post('/users/signup', userController.signup);
-
 router.post('/users/contacts', userController.checkUserByContacts);
-
 router.post('/users/email', userController.checkUserByEmail);
+router.post('/users/pushtoken', userController.sendPushToken);
 
 // only for test
 router.get('/seed', (req: express.Request, res: express.Response) => {

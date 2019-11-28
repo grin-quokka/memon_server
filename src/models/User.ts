@@ -37,6 +37,10 @@ export default class User extends Model<User> {
   @Column
   avatar!: string;
 
+  @AllowNull(false)
+  @Column
+  pushtoken?: string;
+
   @CreatedAt
   @Column
   creationDate!: Date;
