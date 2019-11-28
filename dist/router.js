@@ -93,6 +93,7 @@ router.post('/payment', paymentController_1.default.createPayment);
 router.post('/users/signup', userController_1.default.signup);
 router.post('/users/contacts', userController_1.default.checkUserByContacts);
 router.post('/users/email', userController_1.default.checkUserByEmail);
+router.post('/users/pushtoken', userController_1.default.sendPushToken);
 // only for test
 router.get('/seed', (req, res) => {
     (() => __awaiter(void 0, void 0, void 0, function* () {
