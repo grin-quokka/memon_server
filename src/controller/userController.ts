@@ -1,10 +1,12 @@
 import User from '../models/User';
 import * as express from 'express';
 import * as moment from 'moment-timezone';
+import Expo from 'expo-server-sdk';
 
 const userController = {
   signup: async (req: express.Request, res: express.Response) => {
     try {
+      console.log(req.body);
       let user = await User.create(req.body);
       const stringi = JSON.stringify(user);
       const pars = JSON.parse(stringi);

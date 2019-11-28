@@ -14,6 +14,7 @@ const moment = require("moment-timezone");
 const userController = {
     signup: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
+            console.log(req.body);
             let user = yield User_1.default.create(req.body);
             const stringi = JSON.stringify(user);
             const pars = JSON.parse(stringi);

@@ -37,6 +37,11 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "avatar", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Column,
+    __metadata("design:type", String)
+], User.prototype, "pushtoken", void 0);
+__decorate([
     sequelize_typescript_1.CreatedAt,
     sequelize_typescript_1.Column,
     __metadata("design:type", Date)
