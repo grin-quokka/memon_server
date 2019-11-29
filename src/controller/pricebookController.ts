@@ -23,10 +23,20 @@ const pricebookController = {
         where: { email: req.body.email }
       });
 
+      if (!user) {
+        res.status(400).send({ msg: 'NoUser' });
+        return;
+      }
+
       const pricebook = await Pricebook.findOne({
         raw: true,
         where: { id: req.body.pricebookId }
       });
+
+      if (!pricebook) {
+        res.status(400).send({ msg: 'NoPricebook' });
+        return;
+      }
 
       const payment = await Payment.findAll({
         raw: true,
@@ -71,8 +81,7 @@ const pricebookController = {
 
       res.send(result);
     } catch (err) {
-      console.log(err);
-      res.sendStatus(400);
+      res.status(400).send({ msg: err.name });
     }
   }
 };

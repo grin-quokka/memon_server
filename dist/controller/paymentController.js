@@ -89,8 +89,7 @@ const paymentController = {
             res.send(paymentController.sortByPartyDate(result));
         }
         catch (err) {
-            console.log(err);
-            res.sendStatus(400);
+            res.status(400).send({ msg: err.name });
         }
     }),
     createPayment: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -131,7 +130,7 @@ const paymentController = {
             });
         }
         catch (err) {
-            res.sendStatus(400);
+            res.status(400).send({ msg: err.name });
         }
     })
 };
