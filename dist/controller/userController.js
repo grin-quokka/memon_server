@@ -16,7 +16,6 @@ const expo_server_sdk_1 = require("expo-server-sdk");
 const userController = {
     signup: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            console.log(req.body);
             let user = yield User_1.default.create(req.body);
             const stringi = JSON.stringify(user);
             const pars = JSON.parse(stringi);
@@ -25,27 +24,23 @@ const userController = {
                     .format(), updatedOn: moment(user.updatedOn)
                     .tz('Asia/Seoul')
                     .format() });
-            res.status(201).json(change);
+            res.status(201).send(change);
         }
         catch (err) {
-            console.log(err);
-            res.sendStatus(400);
+            res.status(400).send({ msg: err.name });
         }
     }),
-    checkUserByEmail: (req, res) => {
+    checkUserByEmail: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            User_1.default.findOne({ where: req.body }).then(user => {
-                console.log(user);
-                user
-                    ? res.status(200).json({ result: true })
-                    : res.status(200).json({ result: false });
-            });
+            const user = yield User_1.default.findOne({ where: req.body });
+            user
+                ? res.status(200).json({ result: true })
+                : res.status(200).json({ result: false });
         }
         catch (err) {
-            console.log(err);
-            res.sendStatus(400);
+            res.status(400).send({ msg: err.name });
         }
-    },
+    }),
     checkUserByContacts: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const result = [];
@@ -65,8 +60,7 @@ const userController = {
             res.send(result);
         }
         catch (err) {
-            console.log(err);
-            res.sendStatus(400);
+            res.status(400).send({ msg: err.name });
         }
     }),
     sendPushToken: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -78,15 +72,26 @@ const userController = {
                     raw: true,
                     where: { pricebookId: req.body.pricebookId }
                 });
+                if (!payment) {
+                    res.status(400).send({ msg: 'NoPayment' });
+                    return;
+                }
                 user = yield User_1.default.findOne({
                     raw: true,
                     where: { id: payment.bossId }
                 });
+                if (!user) {
+                    res.status(400).send({ msg: 'NoUser' });
+                    return;
+                }
             }
             let expo = new expo_server_sdk_1.default();
             let messages = [];
             if (!expo_server_sdk_1.default.isExpoPushToken(user.pushtoken)) {
-                console.error(`Push token ${user.pushtoken} is not a valid Expo push token`);
+                res.status(400).send({
+                    msg: `[${user}]'s Push token ${user.pushtoken} is not a valid Expo push token`
+                });
+                return;
             }
             messages.push({
                 to: user.pushtoken,
@@ -104,19 +109,17 @@ const userController = {
                             res.sendStatus(200);
                         }
                         else {
-                            res.sendStatus(400);
+                            res.status(400);
                         }
                     }
                     catch (error) {
-                        console.error(error);
-                        res.sendStatus(400);
+                        res.status(400).send({ msg: error });
                     }
                 }
             }))();
         }
         catch (error) {
-            console.log(error);
-            res.sendStatus(400);
+            res.status(400).send({ msg: error });
         }
     })
 };

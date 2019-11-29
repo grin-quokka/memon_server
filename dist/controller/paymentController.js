@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const User_1 = require("../models/User");
 const Pricebook_1 = require("../models/Pricebook");
 const Payment_1 = require("../models/Payment");
+const sequelizeConfig_1 = require("../sequelizeConfig");
 const paymentController = {
     sortByPartyDate: (allPaymentArr) => {
         return allPaymentArr.sort((a, b) => {
@@ -26,6 +27,10 @@ const paymentController = {
                 raw: true,
                 where: { email: req.body.email }
             });
+            if (!user) {
+                res.status(400).send({ msg: 'NoUser' });
+                return;
+            }
             const bossPayment = yield Payment_1.default.findAll({
                 raw: true,
                 where: {
@@ -84,32 +89,48 @@ const paymentController = {
             res.send(paymentController.sortByPartyDate(result));
         }
         catch (err) {
-            console.log(err);
-            res.sendStatus(400);
+            res.status(400).send({ msg: err.name });
         }
     }),
     createPayment: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const pricebook = yield Pricebook_1.default.create(req.body.priceBook);
+            let pricebookId;
             const user = yield User_1.default.findOne({
                 raw: true,
                 where: { email: req.body.email }
             });
-            for (let i = 0; i < req.body.participant.length; i++) {
-                yield Payment_1.default.create({
-                    bossId: user.id,
-                    participantId: req.body.participant[i].id,
-                    pricebookId: pricebook.id,
-                    isIn: req.body.participant[i].isIn,
-                    isPayed: false,
-                    demandCnt: 0
-                });
+            if (!user) {
+                res.status(400).send({ msg: 'NoUser' });
+                return;
             }
-            res.send({ pricebookId: pricebook.id });
+            sequelizeConfig_1.sequelizeConfig
+                .transaction(t => {
+                return Pricebook_1.default.create(Object.assign({}, req.body.priceBook), { transaction: t }).then(pricebook => {
+                    pricebookId = pricebook.id;
+                    var promises = [];
+                    for (let i = 0; i < req.body.participant.length; i++) {
+                        var newPromise = Payment_1.default.create({
+                            bossId: user.id,
+                            participantId: req.body.participant[i].id,
+                            pricebookId: pricebook.id,
+                            isIn: req.body.participant[i].isIn,
+                            isPayed: false,
+                            demandCnt: 0
+                        }, { transaction: t });
+                        promises.push(newPromise);
+                    }
+                    return Promise.all(promises);
+                });
+            })
+                .then(result => {
+                res.send({ pricebookId });
+            })
+                .catch(err => {
+                res.status(400).send({ msg: err.name });
+            });
         }
         catch (err) {
-            console.log(err);
-            res.sendStatus(400);
+            res.status(400).send({ msg: err.name });
         }
     })
 };

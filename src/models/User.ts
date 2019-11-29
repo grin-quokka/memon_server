@@ -49,6 +49,9 @@ export default class User extends Model<User> {
   @Column
   updatedOn!: Date;
 
-  @HasMany(() => Payment, { onDelete: 'cascade' })
-  payment: Payment[];
+  @HasMany(() => Payment, { foreignKey: 'bossId', onDelete: 'cascade' })
+  bossPayment: Payment[];
+
+  @HasMany(() => Payment, { foreignKey: 'participantId', onDelete: 'cascade' })
+  participantPayment: Payment[];
 }

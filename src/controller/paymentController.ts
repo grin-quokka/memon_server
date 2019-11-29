@@ -2,6 +2,7 @@ import User from '../models/User';
 import Pricebook from '../models/Pricebook';
 import Payment from '../models/Payment';
 import * as express from 'express';
+import { sequelizeConfig as sequelize } from '../sequelizeConfig';
 
 interface AllPayment {
   boss: boolean;
@@ -27,6 +28,11 @@ const paymentController = {
         raw: true,
         where: { email: req.body.email }
       });
+
+      if (!user) {
+        res.status(400).send({ msg: 'NoUser' });
+        return;
+      }
 
       const bossPayment = await Payment.findAll({
         raw: true,
@@ -92,34 +98,57 @@ const paymentController = {
 
       res.send(paymentController.sortByPartyDate(result));
     } catch (err) {
-      console.log(err);
-      res.sendStatus(400);
+      res.status(400).send({ msg: err.name });
     }
   },
   createPayment: async (req: express.Request, res: express.Response) => {
     try {
-      const pricebook = await Pricebook.create(req.body.priceBook);
-
+      let pricebookId: number;
       const user = await User.findOne({
         raw: true,
         where: { email: req.body.email }
       });
 
-      for (let i = 0; i < req.body.participant.length; i++) {
-        await Payment.create({
-          bossId: user.id,
-          participantId: req.body.participant[i].id,
-          pricebookId: pricebook.id,
-          isIn: req.body.participant[i].isIn,
-          isPayed: false,
-          demandCnt: 0
-        });
+      if (!user) {
+        res.status(400).send({ msg: 'NoUser' });
+        return;
       }
 
-      res.send({ pricebookId: pricebook.id });
+      sequelize
+        .transaction(t => {
+          return Pricebook.create(
+            { ...req.body.priceBook },
+            { transaction: t }
+          ).then(pricebook => {
+            pricebookId = pricebook.id;
+            var promises = [];
+
+            for (let i = 0; i < req.body.participant.length; i++) {
+              var newPromise = Payment.create(
+                {
+                  bossId: user.id,
+                  participantId: req.body.participant[i].id,
+                  pricebookId: pricebook.id,
+                  isIn: req.body.participant[i].isIn,
+                  isPayed: false,
+                  demandCnt: 0
+                },
+                { transaction: t }
+              );
+              promises.push(newPromise);
+            }
+
+            return Promise.all(promises);
+          });
+        })
+        .then(result => {
+          res.send({ pricebookId });
+        })
+        .catch(err => {
+          res.status(400).send({ msg: err.name });
+        });
     } catch (err) {
-      console.log(err);
-      res.sendStatus(400);
+      res.status(400).send({ msg: err.name });
     }
   }
 };
