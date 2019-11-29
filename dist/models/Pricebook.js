@@ -27,6 +27,11 @@ __decorate([
 __decorate([
     sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
+    __metadata("design:type", Number)
+], Pricebook.prototype, "fixedTotalPrice", void 0);
+__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Column,
     __metadata("design:type", Boolean)
 ], Pricebook.prototype, "transCompleted", void 0);
 __decorate([
