@@ -46,7 +46,7 @@ router.post('/main', async (req: express.Request, res: express.Response) => {
           where: { id: payment[i].pricebookId, transCompleted: false }
         });
 
-        sum.moneyToPay += pricebook.totalPrice / pricebook.count;
+        sum.moneyToPay += pricebook.fixedTotalPrice / pricebook.count;
       }
     }
 
@@ -74,7 +74,7 @@ router.post('/main', async (req: express.Request, res: express.Response) => {
           where: { id: Number(pricebookCntKeys[i]) }
         });
         sum.moneyToGet +=
-          (getPrice.totalPrice / getPrice.count) *
+          (getPrice.fixedTotalPrice / getPrice.count) *
           pricebookCnt[pricebookCntKeys[i]];
       }
     }
