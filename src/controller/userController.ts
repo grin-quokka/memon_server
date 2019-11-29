@@ -7,7 +7,6 @@ import Expo, { ExpoPushMessage } from 'expo-server-sdk';
 const userController = {
   signup: async (req: express.Request, res: express.Response) => {
     try {
-      console.log(req.body);
       let user = await User.create(req.body);
       const stringi = JSON.stringify(user);
       const pars = JSON.parse(stringi);
@@ -21,28 +20,29 @@ const userController = {
           .tz('Asia/Seoul')
           .format()
       };
-      res.status(201).json(change);
+      res.status(201).send(change);
     } catch (err) {
-      console.log(err);
-      res.sendStatus(400);
+      res.status(400).send({ msg: err.name });
     }
   },
-  checkUserByEmail: (req: express.Request, res: express.Response) => {
+  checkUserByEmail: async (req: express.Request, res: express.Response) => {
     try {
-      User.findOne({ where: req.body }).then(user => {
-        console.log(user);
-        user
-          ? res.status(200).json({ result: true })
-          : res.status(200).json({ result: false });
-      });
+      const user = await User.findOne({ where: req.body });
+      user
+        ? res.status(200).json({ result: true })
+        : res.status(200).json({ result: false });
     } catch (err) {
-      console.log(err);
-      res.sendStatus(400);
+      res.status(400).send({ msg: err.name });
     }
   },
   checkUserByContacts: async (req: express.Request, res: express.Response) => {
     try {
-      const result: Object[] = [];
+      interface result {
+        name: string;
+        phone: string;
+        id: number;
+      }
+      const result: result[] = [];
 
       for (let i = 0; i < req.body.length; i++) {
         const user = await User.findOne({
@@ -61,8 +61,7 @@ const userController = {
 
       res.send(result);
     } catch (err) {
-      console.log(err);
-      res.sendStatus(400);
+      res.status(400).send({ msg: err.name });
     }
   },
   sendPushToken: async (req: express.Request, res: express.Response) => {
@@ -75,19 +74,30 @@ const userController = {
           where: { pricebookId: req.body.pricebookId }
         });
 
+        if (!payment) {
+          res.status(400).send({ msg: 'NoPayment' });
+          return;
+        }
+
         user = await User.findOne({
           raw: true,
           where: { id: payment.bossId }
         });
+
+        if (!user) {
+          res.status(400).send({ msg: 'NoUser' });
+          return;
+        }
       }
 
       let expo = new Expo();
       let messages: ExpoPushMessage[] = [];
 
       if (!Expo.isExpoPushToken(user.pushtoken)) {
-        console.error(
-          `Push token ${user.pushtoken} is not a valid Expo push token`
-        );
+        res.status(400).send({
+          msg: `[${user}]'s Push token ${user.pushtoken} is not a valid Expo push token`
+        });
+        return;
       }
 
       messages.push({
@@ -107,17 +117,15 @@ const userController = {
             if (ticketChunk[0].status === 'ok') {
               res.sendStatus(200);
             } else {
-              res.sendStatus(400);
+              res.status(400);
             }
           } catch (error) {
-            console.error(error);
-            res.sendStatus(400);
+            res.status(400).send({ msg: error });
           }
         }
       })();
     } catch (error) {
-      console.log(error);
-      res.sendStatus(400);
+      res.status(400).send({ msg: error });
     }
   }
 };
