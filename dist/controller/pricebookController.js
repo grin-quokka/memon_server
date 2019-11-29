@@ -17,6 +17,7 @@ const moment = require("moment-timezone");
 const pricebookController = {
     getSinglePricebook: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
+            let paymentObj = [];
             const user = yield User_1.default.findOne({
                 raw: true,
                 where: { email: req.body.email }
@@ -40,6 +41,14 @@ const pricebookController = {
                     [sequelize.Op.or]: [{ bossId: user.id }, { participantId: user.id }]
                 }
             });
+            paymentObj = [...payment];
+            for (let i = 0; i < paymentObj.length; i++) {
+                const participant = yield User_1.default.findOne({
+                    raw: true,
+                    where: { id: payment[i].participantId }
+                });
+                paymentObj[i].phone = participant.phone;
+            }
             const result = {
                 boss: req.body.boss,
                 pricebook: Object.assign(Object.assign({}, pricebook), { creationDate: moment(pricebook.creationDate)
@@ -47,7 +56,7 @@ const pricebookController = {
                         .format(), updatedOn: moment(pricebook.updatedOn)
                         .tz('Asia/Seoul')
                         .format() }),
-                payment
+                paymentObj
             };
             res.send(result);
         }

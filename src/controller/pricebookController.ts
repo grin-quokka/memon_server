@@ -8,6 +8,16 @@ import * as moment from 'moment-timezone';
 const pricebookController = {
   getSinglePricebook: async (req: express.Request, res: express.Response) => {
     try {
+      interface participant {
+        id: number;
+        bossId: number;
+        participantId: number;
+        isIn: boolean;
+        isPayed: boolean;
+        demandCnt: number;
+        phone?: string;
+      }
+      let paymentObj: participant[] = [];
       const user = await User.findOne({
         raw: true,
         where: { email: req.body.email }
@@ -34,6 +44,17 @@ const pricebookController = {
         }
       });
 
+      paymentObj = [...payment];
+
+      for (let i = 0; i < paymentObj.length; i++) {
+        const participant = await User.findOne({
+          raw: true,
+          where: { id: payment[i].participantId }
+        });
+
+        paymentObj[i].phone = participant.phone;
+      }
+
       const result = {
         boss: req.body.boss,
         pricebook: {
@@ -45,7 +66,7 @@ const pricebookController = {
             .tz('Asia/Seoul')
             .format()
         },
-        payment
+        paymentObj
       };
 
       res.send(result);
