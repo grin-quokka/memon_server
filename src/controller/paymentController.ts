@@ -121,10 +121,10 @@ const paymentController = {
             { transaction: t }
           ).then(pricebook => {
             pricebookId = pricebook.id;
-            var promises = [];
+            const promises = [];
 
             for (let i = 0; i < req.body.participant.length; i++) {
-              var newPromise = Payment.create(
+              const newPromise = Payment.create(
                 {
                   bossId: user.id,
                   participantId: req.body.participant[i].id,
@@ -149,6 +149,45 @@ const paymentController = {
         });
     } catch (err) {
       res.status(400).send({ msg: err.name });
+    }
+  },
+  confirmPayment: async (req: express.Request, res: express.Response) => {
+    try {
+      for (let i = 0; i < req.body.paymentId.length; i++) {
+        const checkedPayment = await Payment.findOne({
+          where: req.body.paymentId[i]
+        });
+
+        if (!checkedPayment) {
+          res
+            .status(400)
+            .send({ msg: `NoPayment at ${req.body.paymentId[i]}` });
+          return;
+        }
+      }
+
+      sequelize
+        .transaction(t => {
+          const promises = [];
+
+          for (let i = 0; i < req.body.paymentId.length; i++) {
+            const newPromise = Payment.update(
+              { isPayed: true },
+              { where: { id: req.body.paymentId[i] }, transaction: t }
+            );
+            promises.push(newPromise);
+          }
+
+          return Promise.all(promises);
+        })
+        .then(result => {
+          res.sendStatus(200);
+        })
+        .catch(err => {
+          res.status(400).send({ msg: err });
+        });
+    } catch (err) {
+      res.status(400).send({ msg: err });
     }
   }
 };

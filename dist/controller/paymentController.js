@@ -107,9 +107,9 @@ const paymentController = {
                 .transaction(t => {
                 return Pricebook_1.default.create(Object.assign({}, req.body.priceBook), { transaction: t }).then(pricebook => {
                     pricebookId = pricebook.id;
-                    var promises = [];
+                    const promises = [];
                     for (let i = 0; i < req.body.participant.length; i++) {
-                        var newPromise = Payment_1.default.create({
+                        const newPromise = Payment_1.default.create({
                             bossId: user.id,
                             participantId: req.body.participant[i].id,
                             pricebookId: pricebook.id,
@@ -131,6 +131,39 @@ const paymentController = {
         }
         catch (err) {
             res.status(400).send({ msg: err.name });
+        }
+    }),
+    confirmPayment: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            for (let i = 0; i < req.body.paymentId.length; i++) {
+                const checkedPayment = yield Payment_1.default.findOne({
+                    where: req.body.paymentId[i]
+                });
+                if (!checkedPayment) {
+                    res
+                        .status(400)
+                        .send({ msg: `NoPayment at ${req.body.paymentId[i]}` });
+                    return;
+                }
+            }
+            sequelizeConfig_1.sequelizeConfig
+                .transaction(t => {
+                const promises = [];
+                for (let i = 0; i < req.body.paymentId.length; i++) {
+                    const newPromise = Payment_1.default.update({ isPayed: true }, { where: { id: req.body.paymentId[i] }, transaction: t });
+                    promises.push(newPromise);
+                }
+                return Promise.all(promises);
+            })
+                .then(result => {
+                res.sendStatus(200);
+            })
+                .catch(err => {
+                res.status(400).send({ msg: err });
+            });
+        }
+        catch (err) {
+            res.status(400).send({ msg: err });
         }
     })
 };

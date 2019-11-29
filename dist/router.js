@@ -90,6 +90,7 @@ router.get('/login', (req, res) => {
 router.post('/pricebook', pricebookController_1.default.getSinglePricebook);
 router.post('/payment/all', paymentController_1.default.getAllPayment);
 router.post('/payment', paymentController_1.default.createPayment);
+router.patch('/payment/ispayed', paymentController_1.default.confirmPayment);
 router.post('/users/signup', userController_1.default.signup);
 router.post('/users/contacts', userController_1.default.checkUserByContacts);
 router.post('/users/email', userController_1.default.checkUserByEmail);

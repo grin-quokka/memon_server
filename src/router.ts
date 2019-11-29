@@ -94,6 +94,7 @@ router.post('/pricebook', pricebookController.getSinglePricebook);
 
 router.post('/payment/all', paymentController.getAllPayment);
 router.post('/payment', paymentController.createPayment);
+router.patch('/payment/ispayed', paymentController.confirmPayment);
 
 router.post('/users/signup', userController.signup);
 router.post('/users/contacts', userController.checkUserByContacts);
