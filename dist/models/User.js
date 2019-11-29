@@ -52,9 +52,13 @@ __decorate([
     __metadata("design:type", Date)
 ], User.prototype, "updatedOn", void 0);
 __decorate([
-    sequelize_typescript_1.HasMany(() => Payment_1.default, { onDelete: 'cascade' }),
+    sequelize_typescript_1.HasMany(() => Payment_1.default, { foreignKey: 'bossId', onDelete: 'cascade' }),
     __metadata("design:type", Array)
-], User.prototype, "payment", void 0);
+], User.prototype, "bossPayment", void 0);
+__decorate([
+    sequelize_typescript_1.HasMany(() => Payment_1.default, { foreignKey: 'participantId', onDelete: 'cascade' }),
+    __metadata("design:type", Array)
+], User.prototype, "participantPayment", void 0);
 User = __decorate([
     sequelize_typescript_1.Table({
         timestamps: true,
