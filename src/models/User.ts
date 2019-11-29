@@ -39,7 +39,7 @@ export default class User extends Model<User> {
 
   @AllowNull(false)
   @Column
-  pushtoken?: string;
+  pushtoken!: string;
 
   @CreatedAt
   @Column

@@ -95,16 +95,16 @@ const paymentController = {
                 raw: true,
                 where: { email: req.body.email }
             });
-            yield req.body.participant.forEach(ele => {
-                Payment_1.default.create({
+            for (let i = 0; i < req.body.participant.length; i++) {
+                yield Payment_1.default.create({
                     bossId: user.id,
-                    participantId: ele.id,
+                    participantId: req.body.participant[i].id,
                     pricebookId: pricebook.id,
-                    isIn: ele.isIn,
+                    isIn: req.body.participant[i].isIn,
                     isPayed: false,
                     demandCnt: 0
                 });
-            });
+            }
             res.send({ pricebookId: pricebook.id });
         }
         catch (err) {
