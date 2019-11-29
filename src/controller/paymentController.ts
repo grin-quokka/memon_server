@@ -29,6 +29,11 @@ const paymentController = {
         where: { email: req.body.email }
       });
 
+      if (!user) {
+        res.status(400).send({ msg: 'NoUser' });
+        return;
+      }
+
       const bossPayment = await Payment.findAll({
         raw: true,
         where: {
@@ -105,43 +110,44 @@ const paymentController = {
         where: { email: req.body.email }
       });
 
-      if (user) {
-        sequelize
-          .transaction(t => {
-            return Pricebook.create(
-              { ...req.body.priceBook },
-              { transaction: t }
-            ).then(pricebook => {
-              pricebookId = pricebook.id;
-              var promises = [];
-
-              for (let i = 0; i < req.body.participant.length; i++) {
-                var newPromise = Payment.create(
-                  {
-                    bossId: user.id,
-                    participantId: req.body.participant[i].id,
-                    pricebookId: pricebook.id,
-                    isIn: req.body.participant[i].isIn,
-                    isPayed: false,
-                    demandCnt: 0
-                  },
-                  { transaction: t }
-                );
-                promises.push(newPromise);
-              }
-
-              return Promise.all(promises);
-            });
-          })
-          .then(result => {
-            res.send({ pricebookId });
-          })
-          .catch(err => {
-            res.status(400).send({ msg: err.name });
-          });
-      } else {
+      if (!user) {
         res.status(400).send({ msg: 'NoUser' });
+        return;
       }
+
+      sequelize
+        .transaction(t => {
+          return Pricebook.create(
+            { ...req.body.priceBook },
+            { transaction: t }
+          ).then(pricebook => {
+            pricebookId = pricebook.id;
+            var promises = [];
+
+            for (let i = 0; i < req.body.participant.length; i++) {
+              var newPromise = Payment.create(
+                {
+                  bossId: user.id,
+                  participantId: req.body.participant[i].id,
+                  pricebookId: pricebook.id,
+                  isIn: req.body.participant[i].isIn,
+                  isPayed: false,
+                  demandCnt: 0
+                },
+                { transaction: t }
+              );
+              promises.push(newPromise);
+            }
+
+            return Promise.all(promises);
+          });
+        })
+        .then(result => {
+          res.send({ pricebookId });
+        })
+        .catch(err => {
+          res.status(400).send({ msg: err.name });
+        });
     } catch (err) {
       res.sendStatus(400);
     }
