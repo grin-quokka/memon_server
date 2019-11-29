@@ -29,6 +29,10 @@ export default class Pricebook extends Model<Pricebook> {
 
   @AllowNull(false)
   @Column
+  fixedTotalPrice!: number;
+
+  @AllowNull(false)
+  @Column
   transCompleted!: boolean;
 
   @Column

@@ -61,7 +61,7 @@ const paymentController = {
                     pricebookId: getPrice.id,
                     partyDate: getPrice.partyDate,
                     title: getPrice.title,
-                    price: (getPrice.totalPrice / getPrice.count) *
+                    price: (getPrice.fixedTotalPrice / getPrice.count) *
                         pricebookCnt[pricebookCntKeys[i]],
                     transCompleted: getPrice.transCompleted
                 });
@@ -76,7 +76,7 @@ const paymentController = {
                     pricebookId: getPrice.id,
                     partyDate: getPrice.partyDate,
                     title: getPrice.title,
-                    price: getPrice.totalPrice / getPrice.count,
+                    price: getPrice.fixedTotalPrice / getPrice.count,
                     isPayed: participantPayment[i].isPayed,
                     transCompleted: getPrice.transCompleted
                 });

@@ -48,7 +48,7 @@ router.post('/main', (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     raw: true,
                     where: { id: payment[i].pricebookId, transCompleted: false }
                 });
-                sum.moneyToPay += pricebook.totalPrice / pricebook.count;
+                sum.moneyToPay += pricebook.fixedTotalPrice / pricebook.count;
             }
         }
         const bossPayment = yield Payment_1.default.findAll({
@@ -72,7 +72,7 @@ router.post('/main', (req, res) => __awaiter(void 0, void 0, void 0, function* (
                     where: { id: Number(pricebookCntKeys[i]) }
                 });
                 sum.moneyToGet +=
-                    (getPrice.totalPrice / getPrice.count) *
+                    (getPrice.fixedTotalPrice / getPrice.count) *
                         pricebookCnt[pricebookCntKeys[i]];
             }
         }
