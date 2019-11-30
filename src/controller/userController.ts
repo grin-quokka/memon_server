@@ -66,7 +66,9 @@ const userController = {
   },
   sendPushToken: async (req: express.Request, res: express.Response) => {
     try {
-      let user: User;
+      let expo = new Expo();
+      let messages: ExpoPushMessage[] = [];
+
       if (req.body.target === 'boss') {
         const payment = await Payment.findOne({
           attributes: ['bossId'],
@@ -79,7 +81,7 @@ const userController = {
           return;
         }
 
-        user = await User.findOne({
+        const user = await User.findOne({
           raw: true,
           where: { id: payment.bossId }
         });
@@ -88,25 +90,59 @@ const userController = {
           res.status(400).send({ msg: 'NoUser' });
           return;
         }
-      }
 
-      let expo = new Expo();
-      let messages: ExpoPushMessage[] = [];
+        if (!Expo.isExpoPushToken(user.pushtoken)) {
+          res.status(400).send({
+            msg: `[${user}]'s Push token ${user.pushtoken} is not a valid Expo push token`
+          });
+          return;
+        }
 
-      if (!Expo.isExpoPushToken(user.pushtoken)) {
-        res.status(400).send({
-          msg: `[${user}]'s Push token ${user.pushtoken} is not a valid Expo push token`
+        messages.push({
+          to: user.pushtoken,
+          sound: 'default',
+          title: req.body.title,
+          body: req.body.msg,
+          data: { pricebookId: req.body.pricebookId }
         });
-        return;
-      }
+      } else if (req.body.target === 'participant') {
+        for (let i = 0; i < req.body.participant.length; i++) {
+          const payment = await Payment.findOne({
+            raw: true,
+            where: {
+              pricebookId: req.body.pricebookId,
+              participantId: req.body.participant[i]
+            }
+          });
 
-      messages.push({
-        to: user.pushtoken,
-        sound: 'default',
-        title: req.body.title,
-        body: req.body.msg,
-        data: { pricebookId: req.body.pricebookId }
-      });
+          if (!payment) {
+            res
+              .status(400)
+              .send({ msg: `NoPayment at ${req.body.participant[i]}` });
+            return;
+          }
+
+          const user = await User.findOne({
+            raw: true,
+            where: { id: req.body.participant[i] }
+          });
+
+          if (!Expo.isExpoPushToken(user.pushtoken)) {
+            res.status(400).send({
+              msg: `[${user}]'s Push token ${user.pushtoken} is not a valid Expo push token`
+            });
+            return;
+          }
+
+          messages.push({
+            to: user.pushtoken,
+            sound: 'default',
+            title: req.body.title,
+            body: req.body.msg,
+            data: { pricebookId: req.body.pricebookId }
+          });
+        }
+      }
 
       let chunks = expo.chunkPushNotifications(messages);
       (async () => {

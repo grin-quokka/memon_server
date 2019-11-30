@@ -65,7 +65,8 @@ const userController = {
     }),
     sendPushToken: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            let user;
+            let expo = new expo_server_sdk_1.default();
+            let messages = [];
             if (req.body.target === 'boss') {
                 const payment = yield Payment_1.default.findOne({
                     attributes: ['bossId'],
@@ -76,7 +77,7 @@ const userController = {
                     res.status(400).send({ msg: 'NoPayment' });
                     return;
                 }
-                user = yield User_1.default.findOne({
+                const user = yield User_1.default.findOne({
                     raw: true,
                     where: { id: payment.bossId }
                 });
@@ -84,22 +85,54 @@ const userController = {
                     res.status(400).send({ msg: 'NoUser' });
                     return;
                 }
-            }
-            let expo = new expo_server_sdk_1.default();
-            let messages = [];
-            if (!expo_server_sdk_1.default.isExpoPushToken(user.pushtoken)) {
-                res.status(400).send({
-                    msg: `[${user}]'s Push token ${user.pushtoken} is not a valid Expo push token`
+                if (!expo_server_sdk_1.default.isExpoPushToken(user.pushtoken)) {
+                    res.status(400).send({
+                        msg: `[${user}]'s Push token ${user.pushtoken} is not a valid Expo push token`
+                    });
+                    return;
+                }
+                messages.push({
+                    to: user.pushtoken,
+                    sound: 'default',
+                    title: req.body.title,
+                    body: req.body.msg,
+                    data: { pricebookId: req.body.pricebookId }
                 });
-                return;
             }
-            messages.push({
-                to: user.pushtoken,
-                sound: 'default',
-                title: req.body.title,
-                body: req.body.msg,
-                data: { pricebookId: req.body.pricebookId }
-            });
+            else if (req.body.target === 'participant') {
+                for (let i = 0; i < req.body.participant.length; i++) {
+                    const payment = yield Payment_1.default.findOne({
+                        raw: true,
+                        where: {
+                            pricebookId: req.body.pricebookId,
+                            participantId: req.body.participant[i]
+                        }
+                    });
+                    if (!payment) {
+                        res
+                            .status(400)
+                            .send({ msg: `NoPayment at ${req.body.participant[i]}` });
+                        return;
+                    }
+                    const user = yield User_1.default.findOne({
+                        raw: true,
+                        where: { id: req.body.participant[i] }
+                    });
+                    if (!expo_server_sdk_1.default.isExpoPushToken(user.pushtoken)) {
+                        res.status(400).send({
+                            msg: `[${user}]'s Push token ${user.pushtoken} is not a valid Expo push token`
+                        });
+                        return;
+                    }
+                    messages.push({
+                        to: user.pushtoken,
+                        sound: 'default',
+                        title: req.body.title,
+                        body: req.body.msg,
+                        data: { pricebookId: req.body.pricebookId }
+                    });
+                }
+            }
             let chunks = expo.chunkPushNotifications(messages);
             (() => __awaiter(void 0, void 0, void 0, function* () {
                 for (let chunk of chunks) {
