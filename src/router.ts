@@ -91,6 +91,10 @@ router.get('/login', (req: express.Request, res: express.Response) => {
 });
 
 router.post('/pricebook', pricebookController.getSinglePricebook);
+router.patch(
+  '/pricebook/transCompleted',
+  pricebookController.completePricebook
+);
 
 router.post('/payment/all', paymentController.getAllPayment);
 router.post('/payment', paymentController.createPayment);

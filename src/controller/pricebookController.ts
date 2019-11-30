@@ -83,6 +83,37 @@ const pricebookController = {
     } catch (err) {
       res.status(400).send({ msg: err.name });
     }
+  },
+  completePricebook: async (req: express.Request, res: express.Response) => {
+    try {
+      const payments = await Payment.findAll({
+        raw: true,
+        where: { pricebookId: req.body.pricebookId }
+      });
+
+      if (payments.length === 0) {
+        res.status(400).send({ msg: 'NoPricebook' });
+        return;
+      }
+
+      for (let i = 0; i < payments.length; i++) {
+        if (!payments[i].isPayed) {
+          res
+            .status(400)
+            .send({ msg: `not payed at payment ${payments[i].id}` });
+          return;
+        }
+      }
+
+      await Pricebook.update(
+        { transCompleted: true },
+        { where: { id: req.body.pricebookId } }
+      );
+
+      res.sendStatus(200);
+    } catch (error) {
+      res.status(400).send({ msg: error });
+    }
   }
 };
 

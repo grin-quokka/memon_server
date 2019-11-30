@@ -88,6 +88,7 @@ router.get('/login', (req, res) => {
     res.send('완료');
 });
 router.post('/pricebook', pricebookController_1.default.getSinglePricebook);
+router.patch('/pricebook/transCompleted', pricebookController_1.default.completePricebook);
 router.post('/payment/all', paymentController_1.default.getAllPayment);
 router.post('/payment', paymentController_1.default.createPayment);
 router.patch('/payment/ispayed', paymentController_1.default.confirmPayment);
