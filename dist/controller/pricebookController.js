@@ -71,6 +71,31 @@ const pricebookController = {
         catch (err) {
             res.status(400).send({ msg: err.name });
         }
+    }),
+    completePricebook: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const payments = yield Payment_1.default.findAll({
+                raw: true,
+                where: { pricebookId: req.body.pricebookId }
+            });
+            if (payments.length === 0) {
+                res.status(400).send({ msg: 'NoPricebook' });
+                return;
+            }
+            for (let i = 0; i < payments.length; i++) {
+                if (!payments[i].isPayed) {
+                    res
+                        .status(400)
+                        .send({ msg: `not payed at payment ${payments[i].id}` });
+                    return;
+                }
+            }
+            yield Pricebook_1.default.update({ transCompleted: true }, { where: { id: req.body.pricebookId } });
+            res.sendStatus(200);
+        }
+        catch (error) {
+            res.status(400).send({ msg: error });
+        }
     })
 };
 exports.default = pricebookController;
