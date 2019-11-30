@@ -25,16 +25,17 @@ router.get('/', (req, res) => {
 router.post('/main', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const sum = {
+            avatar: '',
             moneyToPay: 0,
             moneyToGet: 0
         };
         const email = req.body.email;
         const prkey = yield User_1.default.findOne({
-            attributes: ['id'],
             where: {
                 email
             }
         });
+        sum.avatar = prkey.avatar;
         const payment = yield Payment_1.default.findAll({
             attributes: ['pricebookId'],
             where: {

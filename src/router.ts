@@ -18,6 +18,7 @@ router.get('/', (req: express.Request, res: express.Response) => {
 router.post('/main', async (req: express.Request, res: express.Response) => {
   try {
     const sum = {
+      avatar: '',
       moneyToPay: 0,
       moneyToGet: 0
     };
@@ -25,11 +26,12 @@ router.post('/main', async (req: express.Request, res: express.Response) => {
     const email = req.body.email;
 
     const prkey = await User.findOne({
-      attributes: ['id'],
       where: {
         email
       }
     });
+
+    sum.avatar = prkey.avatar;
 
     const payment = await Payment.findAll({
       attributes: ['pricebookId'],
