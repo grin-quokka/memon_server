@@ -63,14 +63,13 @@ const userController = {
             res.status(400).send({ msg: err.name });
         }
     }),
+    // tslint:disable-next-line: max-func-body-length
     sendPushToken: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             let expo = new expo_server_sdk_1.default();
             let messages = [];
             if (req.body.target === 'boss') {
                 const payment = yield Payment_1.default.findOne({
-                    attributes: ['bossId'],
-                    raw: true,
                     where: { pricebookId: req.body.pricebookId }
                 });
                 if (!payment) {
@@ -78,7 +77,6 @@ const userController = {
                     return;
                 }
                 const user = yield User_1.default.findOne({
-                    raw: true,
                     where: { id: payment.bossId }
                 });
                 if (!user) {
@@ -95,14 +93,12 @@ const userController = {
                     to: user.pushtoken,
                     sound: 'default',
                     title: req.body.title,
-                    body: req.body.msg,
-                    data: { pricebookId: req.body.pricebookId }
+                    body: req.body.msg
                 });
             }
             else if (req.body.target === 'participant') {
                 for (let i = 0; i < req.body.participant.length; i++) {
                     const payment = yield Payment_1.default.findOne({
-                        raw: true,
                         where: {
                             pricebookId: req.body.pricebookId,
                             participantId: req.body.participant[i]
@@ -115,7 +111,6 @@ const userController = {
                         return;
                     }
                     const user = yield User_1.default.findOne({
-                        raw: true,
                         where: { id: req.body.participant[i] }
                     });
                     if (!expo_server_sdk_1.default.isExpoPushToken(user.pushtoken)) {
@@ -126,10 +121,8 @@ const userController = {
                     }
                     messages.push({
                         to: user.pushtoken,
-                        sound: 'default',
                         title: req.body.title,
-                        body: req.body.msg,
-                        data: { pricebookId: req.body.pricebookId }
+                        body: req.body.msg
                     });
                 }
             }
@@ -139,10 +132,26 @@ const userController = {
                     try {
                         let ticketChunk = yield expo.sendPushNotificationsAsync(chunk);
                         if (ticketChunk[0].status === 'ok') {
-                            res.sendStatus(200);
-                        }
-                        else {
-                            res.status(400);
+                            if (req.body.target === 'boss') {
+                                const sender = yield User_1.default.findOne({
+                                    where: { email: req.body.email }
+                                });
+                                if (!sender) {
+                                    res.status(400).send({ msg: 'NoEmail' });
+                                }
+                                const updatePayment = yield Payment_1.default.update({ noti: true }, {
+                                    where: {
+                                        participantId: sender.id,
+                                        pricebookId: req.body.pricebookId
+                                    }
+                                });
+                                if (updatePayment[0] === 0) {
+                                    res.status(400).send({ msg: 'NotUpdated' });
+                                }
+                                else {
+                                    res.sendStatus(200);
+                                }
+                            }
                         }
                     }
                     catch (error) {

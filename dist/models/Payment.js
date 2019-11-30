@@ -54,6 +54,11 @@ __decorate([
     __metadata("design:type", Number)
 ], Payment.prototype, "demandCnt", void 0);
 __decorate([
+    sequelize_typescript_1.Default(false),
+    sequelize_typescript_1.Column,
+    __metadata("design:type", Boolean)
+], Payment.prototype, "noti", void 0);
+__decorate([
     sequelize_typescript_1.CreatedAt,
     sequelize_typescript_1.Column,
     __metadata("design:type", Date)

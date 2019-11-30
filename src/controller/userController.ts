@@ -64,6 +64,7 @@ const userController = {
       res.status(400).send({ msg: err.name });
     }
   },
+  // tslint:disable-next-line: max-func-body-length
   sendPushToken: async (req: express.Request, res: express.Response) => {
     try {
       let expo = new Expo();
@@ -71,8 +72,6 @@ const userController = {
 
       if (req.body.target === 'boss') {
         const payment = await Payment.findOne({
-          attributes: ['bossId'],
-          raw: true,
           where: { pricebookId: req.body.pricebookId }
         });
 
@@ -82,7 +81,6 @@ const userController = {
         }
 
         const user = await User.findOne({
-          raw: true,
           where: { id: payment.bossId }
         });
 
@@ -102,13 +100,11 @@ const userController = {
           to: user.pushtoken,
           sound: 'default',
           title: req.body.title,
-          body: req.body.msg,
-          data: { pricebookId: req.body.pricebookId }
+          body: req.body.msg
         });
       } else if (req.body.target === 'participant') {
         for (let i = 0; i < req.body.participant.length; i++) {
           const payment = await Payment.findOne({
-            raw: true,
             where: {
               pricebookId: req.body.pricebookId,
               participantId: req.body.participant[i]
@@ -123,7 +119,6 @@ const userController = {
           }
 
           const user = await User.findOne({
-            raw: true,
             where: { id: req.body.participant[i] }
           });
 
@@ -136,10 +131,8 @@ const userController = {
 
           messages.push({
             to: user.pushtoken,
-            sound: 'default',
             title: req.body.title,
-            body: req.body.msg,
-            data: { pricebookId: req.body.pricebookId }
+            body: req.body.msg
           });
         }
       }
@@ -151,9 +144,31 @@ const userController = {
             let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
 
             if (ticketChunk[0].status === 'ok') {
-              res.sendStatus(200);
-            } else {
-              res.status(400);
+              if (req.body.target === 'boss') {
+                const sender = await User.findOne({
+                  where: { email: req.body.email }
+                });
+
+                if (!sender) {
+                  res.status(400).send({ msg: 'NoEmail' });
+                }
+
+                const updatePayment = await Payment.update(
+                  { noti: true },
+                  {
+                    where: {
+                      participantId: sender.id,
+                      pricebookId: req.body.pricebookId
+                    }
+                  }
+                );
+
+                if (updatePayment[0] === 0) {
+                  res.status(400).send({ msg: 'NotUpdated' });
+                } else {
+                  res.sendStatus(200);
+                }
+              }
             }
           } catch (error) {
             res.status(400).send({ msg: error });

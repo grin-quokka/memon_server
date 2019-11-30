@@ -8,7 +8,8 @@ import {
   AutoIncrement,
   ForeignKey,
   AllowNull,
-  BelongsTo
+  BelongsTo,
+  Default
 } from 'sequelize-typescript';
 import User from './User';
 import Pricebook from './Pricebook';
@@ -50,6 +51,10 @@ export default class Payment extends Model<Payment> {
   @AllowNull(false)
   @Column
   demandCnt!: number;
+
+  @Default(false)
+  @Column
+  noti!: boolean;
 
   @CreatedAt
   @Column
