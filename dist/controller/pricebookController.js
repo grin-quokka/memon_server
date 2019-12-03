@@ -36,14 +36,7 @@ const pricebookController = {
             }
             const payment = yield Payment_1.default.findAll({
                 raw: true,
-                attributes: [
-                    'id',
-                    'bossId',
-                    'participantId',
-                    'isIn',
-                    'isPayed',
-                    'demandCnt'
-                ],
+                attributes: ['id', 'bossId', 'participantId', 'isIn', 'isPayed'],
                 where: {
                     pricebookId: req.body.pricebookId,
                     [sequelize.Op.or]: [{ bossId: user.id }, { participantId: user.id }]

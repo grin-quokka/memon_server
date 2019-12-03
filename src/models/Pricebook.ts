@@ -50,6 +50,10 @@ export default class Pricebook extends Model<Pricebook> {
   @Column
   title!: string;
 
+  @AllowNull(false)
+  @Column
+  demandCnt!: number;
+
   @CreatedAt
   @Column
   creationDate!: Date;

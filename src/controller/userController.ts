@@ -3,6 +3,7 @@ import Payment from '../models/Payment';
 import * as express from 'express';
 import * as moment from 'moment-timezone';
 import Expo, { ExpoPushMessage } from 'expo-server-sdk';
+import Pricebook from '../models/Pricebook';
 
 const userController = {
   signup: async (req: express.Request, res: express.Response) => {
@@ -197,9 +198,11 @@ const userController = {
                   return;
                 }
               } else if (req.body.target === 'demand') {
-                for (let i = 0; i < demandPayments.length; i++) {
-                  demandPayments[i].increment('demandCnt');
-                }
+                const pricebook = await Pricebook.findOne({
+                  where: { id: req.body.pricebookId }
+                });
+
+                await pricebook.increment('demandCnt');
               }
               res.sendStatus(200);
             }

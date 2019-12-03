@@ -13,6 +13,7 @@ const User_1 = require("../models/User");
 const Payment_1 = require("../models/Payment");
 const moment = require("moment-timezone");
 const expo_server_sdk_1 = require("expo-server-sdk");
+const Pricebook_1 = require("../models/Pricebook");
 const userController = {
     signup: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
@@ -180,9 +181,10 @@ const userController = {
                                 }
                             }
                             else if (req.body.target === 'demand') {
-                                for (let i = 0; i < demandPayments.length; i++) {
-                                    demandPayments[i].increment('demandCnt');
-                                }
+                                const pricebook = yield Pricebook_1.default.findOne({
+                                    where: { id: req.body.pricebookId }
+                                });
+                                yield pricebook.increment('demandCnt');
                             }
                             res.sendStatus(200);
                         }
