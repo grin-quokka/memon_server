@@ -70,6 +70,7 @@ const userController = {
             let expo = new expo_server_sdk_1.default();
             let messages = [];
             let demandPayments;
+            let pricebook;
             if (req.body.target === 'boss') {
                 const payment = yield Payment_1.default.findOne({
                     where: { pricebookId: req.body.pricebookId }
@@ -125,6 +126,13 @@ const userController = {
                 }
             }
             else if (req.body.target === 'demand') {
+                pricebook = yield Pricebook_1.default.findOne({
+                    where: { id: req.body.pricebookId }
+                });
+                if (pricebook.demandCnt >= 5) {
+                    res.status(400).send({ msg: `Can't push more than 5 times` });
+                    return;
+                }
                 demandPayments = yield Payment_1.default.findAll({
                     where: { pricebookId: req.body.pricebookId, isPayed: false }
                 });
@@ -181,9 +189,6 @@ const userController = {
                                 }
                             }
                             else if (req.body.target === 'demand') {
-                                const pricebook = yield Pricebook_1.default.findOne({
-                                    where: { id: req.body.pricebookId }
-                                });
                                 yield pricebook.increment('demandCnt');
                             }
                             res.sendStatus(200);

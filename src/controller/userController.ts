@@ -71,6 +71,7 @@ const userController = {
       let expo = new Expo();
       let messages: ExpoPushMessage[] = [];
       let demandPayments: Payment[];
+      let pricebook: Pricebook;
 
       if (req.body.target === 'boss') {
         const payment = await Payment.findOne({
@@ -133,6 +134,15 @@ const userController = {
           });
         }
       } else if (req.body.target === 'demand') {
+        pricebook = await Pricebook.findOne({
+          where: { id: req.body.pricebookId }
+        });
+
+        if (pricebook.demandCnt >= 5) {
+          res.status(400).send({ msg: `Can't push more than 5 times` });
+          return;
+        }
+
         demandPayments = await Payment.findAll({
           where: { pricebookId: req.body.pricebookId, isPayed: false }
         });
@@ -198,10 +208,6 @@ const userController = {
                   return;
                 }
               } else if (req.body.target === 'demand') {
-                const pricebook = await Pricebook.findOne({
-                  where: { id: req.body.pricebookId }
-                });
-
                 await pricebook.increment('demandCnt');
               }
               res.sendStatus(200);
