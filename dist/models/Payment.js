@@ -49,11 +49,6 @@ __decorate([
     __metadata("design:type", Boolean)
 ], Payment.prototype, "isPayed", void 0);
 __decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Column,
-    __metadata("design:type", Number)
-], Payment.prototype, "demandCnt", void 0);
-__decorate([
     sequelize_typescript_1.Default(false),
     sequelize_typescript_1.Column,
     __metadata("design:type", Boolean)

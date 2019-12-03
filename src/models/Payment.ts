@@ -48,10 +48,6 @@ export default class Payment extends Model<Payment> {
   @Column
   isPayed!: boolean;
 
-  @AllowNull(false)
-  @Column
-  demandCnt!: number;
-
   @Default(false)
   @Column
   noti!: boolean;
