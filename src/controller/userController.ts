@@ -69,6 +69,7 @@ const userController = {
     try {
       let expo = new Expo();
       let messages: ExpoPushMessage[] = [];
+      let demandPayments: Payment[];
 
       if (req.body.target === 'boss') {
         const payment = await Payment.findOne({
@@ -83,11 +84,6 @@ const userController = {
         const user = await User.findOne({
           where: { id: payment.bossId }
         });
-
-        if (!user) {
-          res.status(400).send({ msg: 'NoUser' });
-          return;
-        }
 
         if (!Expo.isExpoPushToken(user.pushtoken)) {
           res.status(400).send({
@@ -135,6 +131,36 @@ const userController = {
             body: req.body.msg
           });
         }
+      } else if (req.body.target === 'demand') {
+        demandPayments = await Payment.findAll({
+          where: { pricebookId: req.body.pricebookId, isPayed: false }
+        });
+
+        if (demandPayments.length === 0) {
+          res.status(400).send({ msg: `NoPayment` });
+          return;
+        }
+
+        for (let i = 0; i < demandPayments.length; i++) {
+          const user = await User.findOne({
+            where: { id: demandPayments[i].participantId }
+          });
+
+          if (!Expo.isExpoPushToken(user.pushtoken)) {
+            res.status(400).send({
+              msg: `[${user.id}]'s Push token ${user.pushtoken} is not a valid Expo push token`
+            });
+            return;
+          }
+
+          messages.push({
+            to: user.pushtoken,
+            title: req.body.title,
+            body: req.body.msg
+          });
+        }
+      } else {
+        res.status(400).send({ msg: `NoTarget for ${req.body.target}` });
       }
 
       let chunks = expo.chunkPushNotifications(messages);
@@ -165,10 +191,17 @@ const userController = {
 
                 if (updatePayment[0] === 0) {
                   res.status(400).send({ msg: 'NotUpdated' });
+                  return;
                 } else {
                   res.sendStatus(200);
+                  return;
+                }
+              } else if (req.body.target === 'demand') {
+                for (let i = 0; i < demandPayments.length; i++) {
+                  demandPayments[i].increment('demandCnt');
                 }
               }
+              res.sendStatus(200);
             }
           } catch (error) {
             res.status(400).send({ msg: error });
