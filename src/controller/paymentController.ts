@@ -130,8 +130,7 @@ const paymentController = {
                   participantId: req.body.participant[i].id,
                   pricebookId: pricebook.id,
                   isIn: req.body.participant[i].isIn,
-                  isPayed: false,
-                  demandCnt: 0
+                  isPayed: false
                 },
                 { transaction: t }
               );

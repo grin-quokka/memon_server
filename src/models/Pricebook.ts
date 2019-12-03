@@ -8,7 +8,8 @@ import {
   AutoIncrement,
   HasMany,
   AllowNull,
-  DataType
+  DataType,
+  Default
 } from 'sequelize-typescript';
 import Payment from './Payment';
 
@@ -50,6 +51,7 @@ export default class Pricebook extends Model<Pricebook> {
   @Column
   title!: string;
 
+  @Default(0)
   @AllowNull(false)
   @Column
   demandCnt!: number;
