@@ -1,5 +1,5 @@
 {
   "rulesDirectory": ["node_modules/tslint-microsoft-contrib"],
-  "rules": {},
+  "rules": { "no-relative-imports": false },
   "extends": ["tslint-microsoft-contrib/recommended"]
 }
